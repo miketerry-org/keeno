@@ -1,0 +1,11 @@
+.DS_Store
+.git
+.gitignore
+.npmignore
+lib2/
+node_modules/
+package-lock.json
+example/
+sample/
+test/
+Todo.md

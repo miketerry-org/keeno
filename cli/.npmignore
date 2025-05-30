@@ -1,0 +1,9 @@
+.ds_store
+.git
+.gitignore
+.npmignore
+node_modules/
+package-lock.json
+sample/
+test/
+Todo.md

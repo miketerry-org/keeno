@@ -1,0 +1,31 @@
+{
+  "name": "keeno-nodemailer",
+  "version": "0.0.1",
+  "description": "Add nodemailer support for each tenant in keeno-express application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miketerry-org/multitenant-nodemailer.git"
+  },
+  "keywords": [
+    "nodemailer",
+    "email",
+    "express",
+    "multitenant-express"
+  ],
+  "author": "Mike Terry",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miketerry-org/multitenant-nodemailer/issues"
+  },
+  "homepage": "https://github.com/miketerry-org/multitenant-nodemailer#readme",
+  "dependencies": {
+    "nodemailer": "^7.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "keeno-cli",
+  "version": "0.0.2",
+  "description": "Quickly scaffold node multitenant express application",
+  "main": "index.js",
+  "bin": {
+    "keeno": "./index.js"
+  },
+  "scripts": {
+    "test": "jest --bail"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miketerry-org/keeno-cli.git"
+  },
+  "keywords": [
+    "keeno",
+    "start",
+    "scaffold",
+    "multitenant",
+    "express",
+    "rest",
+    "api",
+    "mvc",
+    "application"
+  ],
+  "author": "Mike Terry",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miketerry-org/turbostart/issues"
+  },
+  "homepage": "https://github.com/miketerry-org/turbostart#readme",
+  "dependencies": {},
+  "devDependencies": {}
+}

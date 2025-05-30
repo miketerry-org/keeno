@@ -1,0 +1,33 @@
+{
+  "name": "keeno-rest-starter",
+  "version": "0.0.1",
+  "description": "Starter Rest API application using keeno-* packages",
+  "main": "index.js",
+  "scripts": {
+    "prod": "NODE_ENV=prod node index.js",
+    "dev": "NODE_ENV=dev nodemon index.js",
+    "test": "NODE_ENV=jest --bail"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miketerry-org/keeno-rest-starter.git"
+  },
+  "keywords": [
+    "keeno",
+    "rest",
+    "api",
+    "express",
+    "multitenant",
+    "mongodb"
+  ],
+  "author": "Mike Terry",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miketerry-org/keeno-api-starter/issues"
+  },
+  "homepage": "https://github.com/miketerry-org/keeno-api-starter#readme"
+}
