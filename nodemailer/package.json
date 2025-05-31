@@ -1,6 +1,6 @@
 {
   "name": "keeno-nodemailer",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Add nodemailer support for each tenant in keeno-express application",
   "main": "index.js",
   "scripts": {
