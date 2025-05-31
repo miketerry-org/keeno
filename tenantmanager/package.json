@@ -1,6 +1,6 @@
 {
   "name": "keeno-tenantmanager",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Implement multiple tenant support for express applications",
   "main": "index.js",
   "scripts": {
