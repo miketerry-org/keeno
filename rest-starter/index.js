@@ -18,17 +18,19 @@ const { createAPIServer } = require("keeno-rest");
         "Invalid or missing encryption key. Expected a 64-character hexadecimal string via ENCRYPT_KEY or from './_secret.key'."
       );
     }
-    console.log("key", key);
+
+    system.debug("key", key);
 
     // Load the server configuration
     const config = loadEnvFile("_server.secret", key, {}, { verbose: false });
+    system.debug("server.config", config);
 
     const tenantmanager = await createTenantManager({
       filemask: "_tenants/*.secret",
       key,
     });
+    system.debug("tenantManager", tenantmanager.getAll());
 
-    console.log("count", tenantmanager.length);
     /*
     // wait for winston logger to be initialized
     const logger = await createWinstonLog(config);
@@ -41,7 +43,7 @@ const { createAPIServer } = require("keeno-rest");
 
     // start listening for requests
     server.listen(config.port, () => {
-      console.debug(`Server listening on port: ${config.port}`);
+      console.info(`Server listening on port: ${config.port}`);
     });
     */
   } catch (err) {
