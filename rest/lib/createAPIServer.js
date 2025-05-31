@@ -43,7 +43,9 @@ function createAPIServer(config, options = {}) {
 
   // ensure no configuration errors
   if (errors.length > 0) {
-    throw new Error(errors.map(err => err.message).join(", "));
+    const message = errors.map(err => err.message).join(", ");
+    system.debug("createAPIServer", message);
+    throw new Error(message);
   }
 
   // Initialize the express application
@@ -69,8 +71,9 @@ function createAPIServer(config, options = {}) {
   });
   app.use(limiter);
 
-  // Development logging
-  if (system.isDevelopment) {
+  if (system.isDebugging) {
+    app.use(morgan("debug"));
+  } else if (system.isDevelopment) {
     app.use(morgan("dev"));
   }
 
@@ -95,7 +98,9 @@ function createAPIServer(config, options = {}) {
 
   // Health check endpoint
   app.get("/health", (req, res) => {
-    res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
+    // const data = { status: "OK", timestamp: new Date().toISOString() }
+    // system.debug("health check")
+    // res.status(200).json(data)
   });
 
   // Custom routes

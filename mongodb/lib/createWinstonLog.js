@@ -75,13 +75,13 @@ async function createWinstonLog(config) {
           size: log_max_size * 1024 * 1024, // convert MB to bytes
           max: log_max_docs,
         });
-        system.log.debug(`Created capped collection: ${log_collection_name}`);
+        system.debug(`Created capped collection: ${log_collection_name}`);
       } else {
         await db.createCollection(log_collection_name);
-        system.log.debug(`Created standard collection: ${log_collection_name}`);
+        system.debug(`Created standard collection: ${log_collection_name}`);
       }
     } else {
-      system.log.debug(`Collection already exists: ${log_collection_name}`);
+      system.debug(`Collection already exists: ${log_collection_name}`);
     }
 
     // Setup TTL index if TTL logging is enabled
@@ -101,11 +101,11 @@ async function createWinstonLog(config) {
             name: "timestamp_ttl",
           }
         );
-        system.log.debug(
+        system.debug(
           `Created TTL index 'timestamp_ttl' for ${log_expiration_days} days`
         );
       } else {
-        system.log.debug("TTL index 'timestamp_ttl' already exists");
+        system.debug("TTL index 'timestamp_ttl' already exists");
       }
     }
 
@@ -134,7 +134,7 @@ async function createWinstonLog(config) {
     return logger;
   } catch (err) {
     // Log and rethrow any errors
-    system.log.debug(err.message);
+    system.debug(err.message);
     system.log.error(err.message);
     throw new Error(err.message);
   }

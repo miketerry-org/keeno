@@ -4,8 +4,7 @@
 
 // Load required modules
 const path = require.resolve("keeno-env");
-console.log("path", path); // Full absolute path to the module file
-
+const system = require("keeno-system");
 const { loadEnvFiles } = require("keeno-env");
 const createTenantServices = require("./createTenantServices");
 
@@ -22,7 +21,6 @@ const createTenantServices = require("./createTenantServices");
  * @returns {Promise<Object>} Tenant manager instance.
  */
 async function createTenantManager(options = {}) {
-  console.log("ctm1");
   const {
     filemask,
     key = "",
@@ -31,19 +29,12 @@ async function createTenantManager(options = {}) {
     throwOnError = false,
     schema = {},
   } = options;
-  console.log("ctm2");
-
-  console.log("filemask", filemask);
 
   let _tenants = [];
 
   // Load tenant configurations from .env files if filemask is provided
   if (filemask) {
-    console.log("here1");
-    console.log("loadEnvFiles", loadEnvFiles.name);
     _tenants = loadEnvFiles(filemask, key, schema, options);
-    console.log("here2");
-    console.log("here2");
   }
   // Otherwise use provided array of tenant objects
   else if (Array.isArray(tenants)) {

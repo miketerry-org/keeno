@@ -1,5 +1,3 @@
-// loadEnvFiles.js:
-
 "use strict";
 
 const path = require("path");
@@ -11,41 +9,45 @@ const system = require("keeno-system");
  * Load and validate environment configurations from multiple matching files.
  *
  * @param {string} filemask - Glob pattern to match env files.
- * @param {string|null} encryptKey - Optional decryption key for encrypted files.
- * @param {Object|null} schema - Optional schema validator with .validate().
+ * @param {string} [encryptKey=""] - Optional decryption key for encrypted files.
+ * @param {Object} [schema={}] - Optional schema validator object with `.validate()` method.
  * @param {Object} [options={}] - Optional settings.
- * @param {boolean} [options.verbose=false] - Print loaded keys per file.
- * @returns {Array<Object>} Array of read-only configuration objects.
+ * @param {boolean} [options.verbose=false] - If true, log loaded keys per file.
+ * @param {boolean} [options.suppressErrors=false] - If true, errors will not throw and loading continues.
+ * @returns {Array<Object>} Array of loaded and validated config objects.
+ * @throws {Error} If no files match or a config fails to load and `suppressErrors` is false.
  */
 function loadEnvFiles(filemask, encryptKey = "", schema = {}, options = {}) {
-  console.log("mask", filemask);
-  const cwd = process.cwd();
+  const opts = { ...options };
 
-  // Resolve the glob pattern to absolute file paths
-  const files = glob.sync(filemask, { cwd, absolute: true });
-  console.debug("loadEnvFiles", files);
+  // Resolve glob pattern relative to the working directory
+  const files = glob.sync(filemask, {
+    cwd: system.__workdir,
+    absolute: true,
+  });
 
-  // if no matching files
   if (files.length === 0) {
-    throw new Error(`No environment files matched pattern: ${filemask}`);
+    const message = `No environment files matched pattern: ${filemask}`;
+    system.debug(message);
+    throw new Error(message);
   }
 
-  // initialize the array of tenant configuration objects
   const configs = [];
 
-  // loop thru all files in array
   for (const file of files) {
     try {
-      // load the tenant's configuration file
-      const config = loadEnvFile(file, encryptKey, schema, options);
-
-      // add the configuration object to the array
+      const config = loadEnvFile(file, encryptKey, schema, opts);
       configs.push(config);
+
+      if (opts.verbose) {
+        system.log.debug(`Loaded env file: ${file}`);
+      }
     } catch (err) {
-      system.log.error(
-        `Error loading tenant configuration file "${file}": ${err.message}`
-      );
-      if (!options.suppressErrors) {
+      const message = `Error loading config file "${file}": ${err.message}`;
+      system.debug(message);
+      system.log.error(message);
+
+      if (!opts.suppressErrors) {
         throw err;
       }
     }

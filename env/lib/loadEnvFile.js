@@ -4,7 +4,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const system = require("keeno-schema"); // assumes system.fatal exists
+const system = require("keeno-system");
 const TopSecret = require("topsecret");
 const isJsonLike = require("./isJsonLike.js");
 const { coercePrimitive } = require("keeno-system");
@@ -21,7 +21,9 @@ const createReadOnlyObject = require("./createReadOnlyObject");
  * @returns {Object} Read-only configuration object.
  */
 function loadEnvFile(filename, encryptKey = null, schema = {}, options = {}) {
-  console.log("loadEnvFile", filename);
+  system.debug(`loadEnvFile: ${filename}`);
+  system.debug("encryptKey", encryptKey);
+
   // destructure verbose flag from options and use false if not specified
   const { verbose = false } = options;
 
@@ -45,11 +47,12 @@ function loadEnvFile(filename, encryptKey = null, schema = {}, options = {}) {
     ts.key = encryptKey;
 
     try {
-      console.log("before");
+      // attempt to decrypt the buffer
       raw = ts.decryptBufferFromFile(resolvedPath);
     } catch (err) {
-      console.log("trapped error");
-      throw new Error(`Failed to decrypt file. (${filename})`);
+      const message = `Failed to decrypt file. (${filename})`;
+      system.debug(message);
+      throw new Error(message);
     }
   }
 
