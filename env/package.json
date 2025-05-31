@@ -10,11 +10,6 @@
     "decrypt": "node index.js --decrypt",
     "test": "jest --bail"
   },
-  "dependencies": {
-    "keeno-schema": "^0.4.1",
-    "keeno-system": "^0.2.1",
-    "topsecret": "^0.10.3"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/miketerry-org/keeno-env.git"
@@ -36,5 +31,10 @@
   "bugs": {
     "url": "https://github.com/miketerry-org/keeno-env/issues"
   },
-  "homepage": "https://github.com/miketerry-org/keeno-env#readme"
+  "homepage": "https://github.com/miketerry-org/keeno-env#readme",
+  "dependencies": {
+    "keeno-schema": "workspace:*",
+    "keeno-system": "workspace:*",
+    "topsecret": "^0.10.3"
+  }
 }

@@ -1,11 +1,10 @@
 packages:
-  - 'env'
-  - 'mongodb'
-  - 'mvc'
-  - 'nodemailer'
-  - 'rest'
-  - 'rest_starter'
-  - 'schema'
-  - 'system'
-  - 'tenantmanager'
-  
+  - env
+  - mongodb
+  - mvc
+  - nodemailer
+  - rest
+  - rest_starter
+  - schema
+  - system
+  - tenantmanager

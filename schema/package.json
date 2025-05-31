@@ -7,13 +7,14 @@
     "dev": "nodemon --config nodemon.dev.json",
     "test": "nodemon --config nodemon.test.json"
   },
-  "dependencies": {
-    "keeno-system": "^0.2.1"
-  },
   "devDependencies": {
     "jest": "^29.7.0"
   },
   "keywords": [],
   "author": "Mike Terry",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "keeno-system": "workspace:*",
+    "topsecret": "^0.10.3"
+  }
 }

@@ -1,33 +1,22 @@
 {
   "name": "keeno-rest-starter",
-  "version": "0.0.1",
-  "description": "Starter Rest API application using keeno-* packages",
+  "version": "0.1.0",
   "main": "index.js",
-  "scripts": {
-    "prod": "NODE_ENV=prod node index.js",
-    "dev": "NODE_ENV=dev nodemon index.js",
-    "test": "NODE_ENV=jest --bail"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0",
-    "supertest": "^7.1.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/miketerry-org/keeno-rest-starter.git"
-  },
+  "description": "A REST API starter built with keeno packages",
   "keywords": [
-    "keeno",
     "rest",
-    "api",
-    "express",
-    "multitenant",
-    "mongodb"
+    "starter",
+    "keeno"
   ],
   "author": "Mike Terry",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/miketerry-org/keeno-api-starter/issues"
-  },
-  "homepage": "https://github.com/miketerry-org/keeno-api-starter#readme"
+  "dependencies": {
+    "keeno-env": "workspace:*",
+    "keeno-mongodb": "workspace:*",
+    "keeno-nodemailer": "workspace:*",
+    "keeno-rest": "workspace:*",
+    "keeno-schema": "workspace:*",
+    "keeno-system": "workspace:*",
+    "keeno-tenantmanager": "workspace:*"
+  }
 }

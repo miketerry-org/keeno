@@ -8,9 +8,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "keeno-schema": "^0.4.1",
-    "keeno-system": "^0.2.1",
-    "mongoose": "^8.15.0",
+    "keeno-schema": "workspace:*",
+    "keeno-system": "workspace:*",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.15.1",
     "winston": "^3.17.0",
     "winston-mongodb": "^6.0.0"
   },

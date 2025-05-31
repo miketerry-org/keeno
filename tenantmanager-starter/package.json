@@ -32,6 +32,6 @@
   "homepage": "https://github.com/miketerry-org/keeno-tenantmanager-starter#readme",
   "dependencies": {
     "dotenv": "^16.5.0",
-    "keeno-tenantmanager": "^0.0.4"
+    "keeno-tenantmanager": "workspace:*"
   }
 }

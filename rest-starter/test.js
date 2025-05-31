@@ -6,6 +6,7 @@
 const {
   loadEncryptKey,
   loadEnvFile,
+  loadEnvFiles,
   mergeIntoProcessEnv,
 } = require("keeno-env");
 
@@ -17,11 +18,8 @@ try {
   console.log("same", key === process.env.ENCRYPT_KEY);
   console.log();
 
-  let data = loadEnvFile("./_server.secret", key);
+  let data = loadEnvFiles("./_tenants/*.secret", key);
   console.log("data", data);
-
-  mergeIntoProcessEnv(data);
-  console.log("process.env", process.env);
 } catch (err) {
   console.error(err);
 }

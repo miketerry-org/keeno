@@ -7,10 +7,9 @@
     "dev": "NODE_ENV=dev nodemon index.js"
   },
   "dependencies": {
-    "glob": "^11.0.2",
-    "keeno-env": "^0.2.4",
-    "keeno-schema": "^0.4.1",
-    "keeno-system": "^0.2.1"
+    "keeno-env": "workspace:*",
+    "keeno-schema": "workspace:*",
+    "keeno-system": "workspace:*"
   },
   "devdependencies": {},
   "repository": {
