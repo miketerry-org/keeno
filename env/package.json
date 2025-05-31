@@ -1,6 +1,6 @@
 {
   "name": "keeno-env",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Implements routines  to work with encrypted environment variable files",
   "main": "index.js",
   "scripts": {
