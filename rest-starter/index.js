@@ -3,11 +3,12 @@
 "use strict";
 
 // Load all necessary modules
+const path = require("path");
 const system = require("keeno-system");
-const createTenantManager = require("keeno-tenantmanager");
 const { loadEncryptKey, loadEnvFile } = require("keeno-env");
 const { createWinstonLog } = require("keeno-mongodb");
 const { createAPIServer } = require("keeno-rest");
+const createTenantManager = require("keeno-tenantmanager");
 
 (async () => {
   try {
@@ -19,33 +20,35 @@ const { createAPIServer } = require("keeno-rest");
       );
     }
 
-    system.debug("key", key);
-
     // Load the server configuration
-    const config = loadEnvFile("_server.secret", key, {}, { verbose: false });
+    const config = loadEnvFile("_server.secret", key, {});
     system.debug("server.config", config);
 
-    const tenantmanager = await createTenantManager({
-      filemask: "_tenants/*.secret",
-      key,
-    });
-    system.debug("tenantManager", tenantmanager.getAll());
+    // get the full file mask for where tenant env files are stored
+    const filemask = path.resolve("_tenants/*.secret");
+    system.debug("tenants filemask", filemask);
 
-    /*
+    // create the tenant manager
+    const tenantmanager = await createTenantManager({ filemask, key });
+    system.debug("tenantManager.length", tenantmanager.getAll().length);
+
     // wait for winston logger to be initialized
     const logger = await createWinstonLog(config);
 
     // assign the system logger
     system.setLog(logger);
+    system.debug(`Logger for server created and assigned to "system.log".`);
+
+    // initialize options passed when creating API server
+    const options = { logger, middlewares: [tenantmanager.restMiddleware] };
 
     // create the rest api server
-    const server = createAPIServer(config, { logger });
+    const server = createAPIServer(config, options);
 
     // start listening for requests
     server.listen(config.port, () => {
-      console.info(`Server listening on port: ${config.port}`);
+      system.debug(`Server listening on port: ${config.port}`);
     });
-    */
   } catch (err) {
     system.fatal(err.message);
   }
