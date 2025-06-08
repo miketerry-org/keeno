@@ -1,9 +1,9 @@
 .ds_store
-.enigma.env
 .env
 .git
 .gitignore
 .npmignore
+docs/
 node_modules/
 package-lock.json
 test/

@@ -3,7 +3,6 @@
 "use strict";
 
 // load all necessary modules
-const createAPIServer = require("./lib/createAPIServer");
-const asyncHandler = require("./lib/asyncHandler");
+const RestServer = require("./lib/restServer");
 
-module.exports = { createAPIServer, asyncHandler };
+module.exports = { createAPIServer, asyncHandler, DataModel };

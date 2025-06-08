@@ -1,8 +1,8 @@
-// index.js: keeno-system
+// index.js: // keeno-system
 
 "use strict";
 
-// load all necessary modules
+// Load all necessary modules
 const coercePrimitive = require("./lib/coercePrimitive");
 const copyFiles = require("./lib/copyFiles");
 const findFiles = require("./lib/findFiles");
@@ -12,6 +12,7 @@ const extractFilename = require("./lib/extractFilename");
 const extractFilePath = require("./lib/extractFilePath");
 const getDestinationFiles = require("./lib/getDestinationFiles");
 const runCommand = require("./lib/runCommand");
+
 const {
   envMode,
   isDebugging,
@@ -25,38 +26,76 @@ const {
 // -------------------------------------------------------------
 
 /**
- * Absolute path to the current working directory where the Node.js
- * process was started (i.e., `process.cwd()`).
- * This is useful for resolving relative paths consistently across modules.
+ * Absolute path to the current working directory.
+ * Useful for resolving relative paths across modules.
  * @type {string}
  */
 const __workdir = process.cwd();
 
 /**
- * Global logging object, defaulting to the built-in `console`.
- * Can be replaced via `setLog()` for custom logging.
+ * Global user role configuration (shared system-wide).
+ * Can be overridden during app bootstrap.
+ * @type {string[]}
+ */
+let _userRoles = ["guest", "member", "staff", "admin"];
+
+/**
+ * Global logger instance, defaults to console.
+ * Can be replaced by setting `log` property.
  * @type {Console}
  */
-let log = console;
+let _logger = console;
+
+// -------------------------------------------------------------
+// User Role Accessors
+// -------------------------------------------------------------
+
+/**
+ * Returns the current list of user roles.
+ * @returns {string[]}
+ */
+function getUserRoles() {
+  return _userRoles;
+}
+
+/**
+ * Sets a new array of user roles.
+ * @param {string[]} roles - An array of non-empty strings.
+ * @throws {Error} if input is invalid.
+ */
+function setUserRoles(roles) {
+  if (!Array.isArray(roles) || roles.length === 0) {
+    throw new Error("userRoles must be a non-empty array of strings.");
+  }
+  if (!roles.every(r => typeof r === "string" && r.trim().length > 0)) {
+    throw new Error("Each user role must be a non-empty string.");
+  }
+
+  // Normalize and freeze for safety
+  _userRoles = Object.freeze(roles.map(r => r.trim().toLowerCase()));
+}
+
+// -------------------------------------------------------------
+// Logger Accessors
+// -------------------------------------------------------------
+
+/**
+ * Validates that an object looks like a logger.
+ * @param {any} value
+ * @returns {boolean}
+ */
+function isValidLogger(value) {
+  const methods = ["log", "info", "warn", "error", "debug"];
+  return value && methods.every(m => typeof value[m] === "function");
+}
 
 // -------------------------------------------------------------
 // Utility Functions
 // -------------------------------------------------------------
 
 /**
- * Replaces the global logger used throughout the system package.
- * This is useful for redirecting logs to a file, buffer, or other logging service.
- * @param {Console} value - A compatible logger object.
- * @returns {Console} The new logger that was set.
- */
-function setLog(value) {
-  log = value;
-  return log;
-}
-
-/**
- * Logs a fatal error message and exits the process with exit code 1.
- * @param {string} message - The error message to display.
+ * Immediately halts the app with a fatal message.
+ * @param {string} message
  */
 function fatal(message) {
   console.error(`Fatal Error: ${message}`);
@@ -64,8 +103,8 @@ function fatal(message) {
 }
 
 /**
- * Immediately halts the program with a custom exit code.
- * @param {number} code - The numeric exit code.
+ * Halts the app with a given exit code.
+ * @param {number} code
  */
 function halt(code) {
   console.error(`ERROR ${code}: Terminating program execution.`);
@@ -73,9 +112,8 @@ function halt(code) {
 }
 
 /**
- * Logs debug output if debug mode is active.
- * Accepts any number of arguments, just like `console.debug`.
- * @param {...any} args - Values to be logged.
+ * Prints debug output if debugging is enabled.
+ * @param {...any} args
  */
 function debug(...args) {
   if (isDebugging) {
@@ -96,8 +134,11 @@ module.exports = {
   isDevelopment,
   isProduction,
   isTesting,
+
   fatal,
   halt,
+  debug,
+
   findFiles,
   copyFiles,
   createDirectories,
@@ -106,8 +147,26 @@ module.exports = {
   extractFilePath,
   coercePrimitive,
   getDestinationFiles,
-  log,
-  setLog,
   runCommand,
-  debug,
+
+  get userRoles() {
+    return getUserRoles();
+  },
+
+  set userRoles(value) {
+    setUserRoles(value);
+  },
+
+  get log() {
+    return _logger;
+  },
+
+  set log(value) {
+    if (!isValidLogger(value)) {
+      throw new Error(
+        "Logger must implement: log(), info(), warn(), error(), and debug()"
+      );
+    }
+    _logger = value;
+  },
 };

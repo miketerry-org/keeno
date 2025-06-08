@@ -1,0 +1,17 @@
+{
+  "name": "keeno-auth",
+  "version": "0.0.1",
+  "description": "Authentication framework for express applications",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_ENV=dev nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Mike Terry",
+  "license": "MIT",
+  "packageManager": "pnpm@10.11.0",
+  "dependencies": {
+    "bcrypt": "^6.0.0"
+  }
+}

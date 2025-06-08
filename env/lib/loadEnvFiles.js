@@ -1,3 +1,5 @@
+// loadEnvFiles.js:
+
 "use strict";
 
 const path = require("path");
@@ -18,14 +20,18 @@ const system = require("keeno-system");
  * @throws {Error} If no files match or a config fails to load and `suppressErrors` is false.
  */
 function loadEnvFiles(filemask, encryptKey = "", schema = {}, options = {}) {
-  const opts = { ...options };
+  if (system.isDevelopment) {
+    console.log("mask", filemask);
+  }
 
-  // Resolve glob pattern relative to the working directory
-  const files = glob.sync(filemask, {
-    cwd: system.__workdir,
-    absolute: true,
-  });
+  // Resolve glob pattern relative to the absolute directory
+  const files = glob.sync(filemask, { absolute: true });
 
+  if (system.isDevelopment) {
+    console.debug("files", files);
+  }
+
+  // throw error if no matching environment files
   if (files.length === 0) {
     const message = `No environment files matched pattern: ${filemask}`;
     system.debug(message);
@@ -36,20 +42,13 @@ function loadEnvFiles(filemask, encryptKey = "", schema = {}, options = {}) {
 
   for (const file of files) {
     try {
-      const config = loadEnvFile(file, encryptKey, schema, opts);
+      const config = loadEnvFile(file, encryptKey, schema, options);
       configs.push(config);
-
-      if (opts.verbose) {
-        system.log.debug(`Loaded env file: ${file}`);
-      }
     } catch (err) {
       const message = `Error loading config file "${file}": ${err.message}`;
       system.debug(message);
       system.log.error(message);
-
-      if (!opts.suppressErrors) {
-        throw err;
-      }
+      throw err;
     }
   }
 

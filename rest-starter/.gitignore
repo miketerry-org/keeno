@@ -1,8 +1,0 @@
-.ds_store
-.env
-.git
-*.env
-*.key
-_tenants/*.env
-node_modules
-package-lock.json

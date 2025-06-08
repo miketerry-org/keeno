@@ -1,11 +1,10 @@
-.DS_Store
+.ds_store
+.env
 .git
 .gitignore
 .npmignore
-lib2/
+docs/
 node_modules/
 package-lock.json
-example/
-sample/
 test/
 Todo.md
