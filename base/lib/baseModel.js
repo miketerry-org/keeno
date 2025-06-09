@@ -7,7 +7,9 @@ class BaseModel {
   #db;
 
   constructor(tenant) {
-    if (!tenant) throw new Error(`"tenant" parameter is missing`);
+    if (!tenant) {
+      throw new Error(`"tenant" parameter is missing`);
+    }
     if (!tenant.db) {
       throw new Error(
         `Tenant "${tenant.site_title}" is missing "db" connection`

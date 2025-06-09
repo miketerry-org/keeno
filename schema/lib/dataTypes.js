@@ -7,7 +7,7 @@ const validBoolean = require("./validBoolean");
 const validCompare = require("./validCompare");
 const validDate = require("./validDate");
 const validEmail = require("./validEmail");
-const validEnumerated = require("./validEnumerated");
+const validEnum = require("./validEnum");
 const validFloat = require("./validFloat");
 const validInteger = require("./validInteger");
 const validMatch = require("./validMatch");
@@ -26,66 +26,66 @@ function define(type, options, validate) {
 }
 
 // Type factory functions
-function boolean(options = {}) {
+function booleanType(options = {}) {
   return define("boolean", options, validBoolean);
 }
 
-function compare(options = {}) {
+function compareType(options = {}) {
   return define("compare", options, validCompare);
 }
 
-function date(options = {}) {
+function dateType(options = {}) {
   return define("date", options, validDate);
 }
 
-function email(options = {}) {
+function emailType(options = {}) {
   return define("email", options, validEmail);
 }
 
-function enumerated(options = {}) {
-  return define("enumerated", options, validEnumerated);
+function enumType(options = {}) {
+  return define("enum", options, validEnum);
 }
 
-function float(options = {}) {
+function floatType(options = {}) {
   return define("float", options, validFloat);
 }
 
-function integer(options = {}) {
+function integerType(options = {}) {
   return define("integer", options, validInteger);
 }
 
-function match(options = {}) {
+function matchType(options = {}) {
   return define("match", options, validMatch);
 }
 
-function password(options = {}) {
+function passwordType(options = {}) {
   return define("password", options, validPassword);
 }
 
-function string(options = {}) {
+function stringType(options = {}) {
   return define("string", options, validString);
 }
 
-function time(options = {}) {
+function timeType(options = {}) {
   return define("time", options, validTime);
 }
 
-function timestamp(options = {}) {
+function timestampType(options = {}) {
   return define("timestamp", options, validTimestamp);
 }
 
 // Export all type builders
 module.exports = {
-  boolean,
-  compare,
-  date,
-  email,
-  enumerated,
-  float,
-  integer,
-  match,
-  password,
-  string,
-  time,
-  timestamp,
+  booleanType,
+  compareType,
+  dateType,
+  emailType,
+  enumType,
+  floatType,
+  integerType,
+  matchType,
+  passwordType,
+  stringType,
+  timeType,
+  timestampType,
 };

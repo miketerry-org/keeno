@@ -8,7 +8,7 @@ const winston = require("winston");
 require("winston-mongodb");
 const { MongoClient } = require("mongodb");
 
-const { boolean, integer, string } = Schema.types;
+const { booleanType, integerType, stringType } = Schema.types;
 
 /**
  * Creates and configures a Winston logger that logs to MongoDB.
@@ -24,16 +24,16 @@ const { boolean, integer, string } = Schema.types;
  * @returns {Promise<winston.Logger>} A configured Winston logger instance.
  * @throws Will throw if validation or MongoDB operations fail.
  */
-async function createWinstonLog(config) {
+async function createWinstonLog(tenant) {
   // Validate config with schema
   const { validated, errors } = new Schema({
-    db_url: string({ min: 1, max: 255, required: true }),
-    log_collection_name: string({ min: 1, max: 255, required: true }),
-    log_expiration_days: integer({ min: 1, max: 365, required: false }),
-    log_capped: boolean({ required: false }),
-    log_max_size: integer({ required: false }),
-    log_max_docs: integer({ required: false }),
-  }).validate(config);
+    db_url: stringType({ min: 1, max: 255, required: true }),
+    log_collection_name: stringType({ min: 1, max: 255, required: true }),
+    log_expiration_days: integerType({ min: 1, max: 365, required: false }),
+    log_capped: booleanType({ required: false }),
+    log_max_size: integerType({ required: false }),
+    log_max_docs: integerType({ required: false }),
+  }).validate(tenant);
 
   // Throw if validation fails
   if (errors.length > 0) {
@@ -129,6 +129,9 @@ async function createWinstonLog(config) {
         }),
       ],
     });
+
+    // display message indicating loffer sucessfully created
+    system.log.info(`Logger created for "${validated.db_url}"`);
 
     // Return the configured logger
     return logger;

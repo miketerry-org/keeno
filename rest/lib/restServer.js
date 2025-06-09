@@ -1,6 +1,6 @@
 "use strict";
 
-const BaseServer = require("./BaseServer");
+const { BaseServer } = require("keeno-base");
 const system = require("keeno-system");
 
 /**

@@ -98,6 +98,7 @@ function isValidLogger(value) {
  * @param {string} message
  */
 function fatal(message) {
+  console.debug("debug", message);
   console.error(`Fatal Error: ${message}`);
   process.exit(1);
 }

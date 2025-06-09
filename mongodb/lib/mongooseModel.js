@@ -2,7 +2,7 @@
 
 "use strict";
 
-const { DataModel } = require("keeno-rest");
+const { BaseModel } = require("keeno-base");
 
 class MongooseModel extends DataModel {
   #model;

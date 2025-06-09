@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=dev nodemon index.js",
-    "debug": "NODE_ENV=debug nodemon index.js"
+    "debug": "NODE_ENV=debug nodemon index.js",
+    "encrypt": "./_encrypt_all.sh"
   },
   "keywords": [
     "rest",

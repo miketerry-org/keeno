@@ -1,12 +1,13 @@
 "use strict";
 
 // Load all necessary modules
-const { Schema, DataTypes } = require("keeno-schema");
+const system = require("keeno-system");
+const Schema = require("keeno-schema");
 const createTenantServices = require("./createTenantServices");
-const { date, integer } = require("keeno-schema/lib/dataTypes");
 
 // Destructure necessary data types
-const { Boolean, Enumerated, Integer, String, Email } = DataTypes;
+const { booleanType, emailType, enumType, integerType, stringType } =
+  Schema.types;
 
 //!!Mike this should be moved to keeno-system and support full and abbreviated names
 const envModes = ["development", "testing", "production"];
@@ -112,10 +113,9 @@ class TenantManager {
     // Validate tenant schema
     const { validated, errors } = this.validate(tenant);
     if (errors && errors.length > 0) {
-      throw new Error(
-        `Tenant validation failed for domain "${
-          tenant.domain || "[unknown]"
-        }": ${JSON.stringify(errors)}`
+      const message = errors.map(err => err.message).join(", ");
+      system.fatal(
+        `Invalid tenant configuration, (${tenant.domain}) ${message}`
       );
     }
 
@@ -140,23 +140,23 @@ class TenantManager {
    */
   schemaDefinition() {
     return {
-      id: integer({ min: 1, max: 100000, required: true }),
-      node: integer({ min: 1, max: 1000, required: true }),
-      mode: Enumerated({ values: envModes, required: true }),
-      domain: String({ min: 1, max: 255, required: true }),
-      db_url: String({ min: 1, max: 255, required: true }),
-      log_collection_name: String({ min: 1, max: 255, required: true }),
-      log_expiration_days: Integer({ min: 1, max: 365, required: true }),
-      log_capped: Boolean({ required: true }),
-      log_max_size: Integer({ min: 0, max: 1000, required: true }),
-      log_max_docs: Integer({ min: 0, max: 1000000, required: true }),
-      site_title: String({ min: 1, max: 255, required: true }),
-      site_slogan: String({ min: 1, max: 255, required: true }),
-      site_owner: String({ min: 1, max: 255, required: true }),
-      site_author: String({ min: 1, max: 255, required: true }),
-      site_copyright: Integer({ min: 2025, required: true }),
-      site_support_email: Email({ min: 1, max: 255, required: true }),
-      site_support_url: String({ min: 1, max: 255, required: true }),
+      id: integerType({ min: 1, max: 100000, required: true }),
+      node: integerType({ min: 1, max: 1000, required: true }),
+      mode: enumType({ values: envModes, required: true }),
+      domain: stringType({ min: 1, max: 255, required: true }),
+      db_url: stringType({ min: 1, max: 255, required: true }),
+      log_collection_name: stringType({ min: 1, max: 255, required: true }),
+      log_expiration_days: integerType({ min: 1, max: 365, required: true }),
+      log_capped: booleanType({ required: true }),
+      log_max_size: integerType({ min: 0, max: 1000, required: true }),
+      log_max_docs: integerType({ min: 0, max: 1000000, required: true }),
+      site_title: stringType({ min: 1, max: 255, required: true }),
+      site_slogan: stringType({ min: 1, max: 255, required: true }),
+      site_owner: stringType({ min: 1, max: 255, required: true }),
+      site_author: stringType({ min: 1, max: 255, required: true }),
+      site_copyright: integerType({ min: 2025, required: true }),
+      site_support_email: emailType({ min: 1, max: 255, required: true }),
+      site_support_url: stringType({ min: 1, max: 255, required: true }),
     };
   }
 

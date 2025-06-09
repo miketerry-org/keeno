@@ -13,7 +13,7 @@ const validValue = require("./validValue");
  * @param {Array<any>} rule.values - Allowed values.
  * @returns {{ value: any, message: string|undefined }}
  */
-function validEnumerated(object, key, rule) {
+function validEnum(object, key, rule) {
   let { value, message } = validValue(object, key, rule);
 
   if (!message) {
@@ -28,4 +28,4 @@ function validEnumerated(object, key, rule) {
   return { value, message };
 }
 
-module.exports = validEnumerated;
+module.exports = validEnum;
