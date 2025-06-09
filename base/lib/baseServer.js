@@ -43,6 +43,12 @@ class BaseServer {
     this.#options = {};
   }
 
+  static async create(config, tenants = [], services = {}, options = {}) {
+    const server = new this();
+    await server.initialize(config, tenants, services, options);
+    return server;
+  }
+
   get app() {
     return this.#app;
   }

@@ -1,0 +1,31 @@
+{
+  "name": "keeno-emailer",
+  "version": "0.1.0",
+  "description": "Implements email sending",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miketerry-org/keeno-emailer.git"
+  },
+  "keywords": [
+    "keeno",
+    "nodemailer",
+    "email",
+    "express",
+    "multitenant-express"
+  ],
+  "author": "Mike Terry",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miketerry-org/keeno-emailer/issues"
+  },
+  "homepage": "https://github.com/miketerry-org/keeno-emailer#readme",
+  "dependencies": {
+    "keeno-schema": "workspace:*",
+    "keeno-system": "workspace:*",
+    "nodemailer": "^7.0.3"
+  }
+}

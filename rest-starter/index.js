@@ -29,8 +29,11 @@ const { createDB, createWinstonLog } = require("keeno-mongodb");
     const options = {};
 
     // initialize the rest server
-    const server = new RestServer();
-    await server.initialize(config, tenants, services, options);
+    const server = await RestServer.create(config, tenants, services, options);
+
+    // start the server listening for request
     server.active = true;
-  } catch (err) {}
+  } catch (err) {
+    system.fatal(`${err.message}`);
+  }
 })();

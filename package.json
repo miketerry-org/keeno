@@ -22,12 +22,12 @@
     "tenantmanager"
   ],
   "devDependencies": {
+    "keeno-base": "workspace:*",
     "keeno-env": "workspace:*",
     "keeno-mongodb": "workspace:*",
     "keeno-nodemailer": "workspace:*",
     "keeno-rest": "workspace:*",
     "keeno-schema": "workspace:*",
-    "keeno-system": "workspace:*",
-    "keeno-tenantmanager": "workspace:*"
+    "keeno-system": "workspace:*"
   }
 }
