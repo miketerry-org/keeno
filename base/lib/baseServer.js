@@ -1,5 +1,3 @@
-// baseServer.js:
-
 "use strict";
 
 // Load required modules
@@ -106,10 +104,10 @@ class BaseServer {
     await this.initRateLimit();
     await this.initLogger();
     await this.initTenantManager();
+    await initModels();
     await this.initMiddlewares();
     await this.initHealthCheck();
-    await this.initCustomRoutes();
-    await this.initVersionedRoutes();
+    await this.initRouters();
     await this.init404Error();
     await this.initErrorHandler();
     await this.initShutdown();
@@ -167,17 +165,41 @@ class BaseServer {
     );
   }
 
-  async initMiddlewares() {}
+  async initModels() {}
 
-  async initHealthCheck() {}
+  /**
+   * Registers any user-defined Express middlewares.
+   * Expects `services.middlewares` to be an array of functions (if defined).
+   */
+  async initMiddlewares() {
+    const { middlewares } = this.#services;
 
-  async initCustomRoutes() {}
+    if (Array.isArray(middlewares)) {
+      for (const middleware of middlewares) {
+        if (typeof middleware === "function") {
+          this.#app.use(middleware);
+        } else {
+          system.log.warn("Ignored invalid middleware (not a function).");
+        }
+      }
+    }
+  }
 
-  async initVersionedRoutes() {}
+  async initHealthCheck() {
+    // To be implemented: health check endpoint (e.g. /healthz)
+  }
 
-  async init404Error() {}
+  async initRouters() {
+    // To be implemented: project-specific routes
+  }
 
-  async initErrorHandler() {}
+  async init404Error() {
+    // To be implemented: catch-all route for 404 errors
+  }
+
+  async initErrorHandler() {
+    // To be implemented: centralized error handling middleware
+  }
 
   async initShutdown() {
     const shutdown = () => {

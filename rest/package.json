@@ -4,6 +4,7 @@
   "description": "initializes express Rest API",
   "main": "index.js",
   "scripts": {
+    "dev": "NODE_ENV=dev nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,7 +24,6 @@
   },
   "homepage": "https://github.com/miketerry-org/keeno-rest#readme",
   "dependencies": {
-    "@clerk/express": "^1.5.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",

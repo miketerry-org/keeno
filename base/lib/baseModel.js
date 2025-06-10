@@ -5,8 +5,9 @@
 class BaseModel {
   #tenant;
   #db;
+  #name;
 
-  constructor(tenant) {
+  constructor(tenant, name) {
     if (!tenant) {
       throw new Error(`"tenant" parameter is missing`);
     }
@@ -14,10 +15,14 @@ class BaseModel {
       throw new Error(
         `Tenant "${tenant.site_title}" is missing "db" connection`
       );
+      if (!name || name.trim() !== "") {
+        throw new Error(`Tenant "${tenant.site_title}" is missing model name`);
+      }
     }
 
     this.#tenant = tenant;
     this.#db = tenant.db;
+    this.#name = name;
   }
 
   get tenant() {
@@ -26,6 +31,10 @@ class BaseModel {
 
   get db() {
     return this.#db;
+  }
+
+  get name() {
+    return this.#name;
   }
 
   // Abstract interface

@@ -1,9 +1,9 @@
-// index.js:
+// index.js: // keeno-mongodb
 
 "use strict";
 
 // load all necessary modules
 const createDB = require("./lib/createDB");
-const createWinstonLog = require("./lib/createWinstonLog");
+const createLog = require("./lib/createLog");
 
-module.exports = { createDB, createWinstonLog };
+module.exports = { createDB, createLog };

@@ -1,4 +1,4 @@
-// createWinstonLog.js:
+// createLog.js:
 
 "use strict";
 
@@ -24,7 +24,7 @@ const { booleanType, integerType, stringType } = Schema.types;
  * @returns {Promise<winston.Logger>} A configured Winston logger instance.
  * @throws Will throw if validation or MongoDB operations fail.
  */
-async function createWinstonLog(tenant) {
+async function createLog(tenant) {
   // Validate config with schema
   const { validated, errors } = new Schema({
     db_url: stringType({ min: 1, max: 255, required: true }),
@@ -143,4 +143,4 @@ async function createWinstonLog(tenant) {
   }
 }
 
-module.exports = createWinstonLog;
+module.exports = createLog;

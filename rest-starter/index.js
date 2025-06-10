@@ -1,4 +1,4 @@
-// index.js: main entry point for keeno-rest-starter
+// index.js: keeno-rest-starter main entry point
 
 "use strict";
 
@@ -7,7 +7,7 @@ const path = require("path");
 const system = require("keeno-system");
 const { loadConfigFiles } = require("keeno-base");
 const { RestServer } = require("keeno-rest");
-const { createDB, createWinstonLog } = require("keeno-mongodb");
+const { createDB, createLog, AuthModel } = require("keeno-mongodb");
 
 (async () => {
   try {
@@ -24,16 +24,13 @@ const { createDB, createWinstonLog } = require("keeno-mongodb");
       console.log("tenants", tenants);
     }
 
-    // initialize services and options parameters
+    // create services object
     const services = { db: createDB, log: createWinstonLog };
-    const options = {};
 
-    // initialize the rest server
-    const server = await RestServer.create(config, tenants, services, options);
-
-    // start the server listening for request
-    server.active = true;
-  } catch (err) {
-    system.fatal(`${err.message}`);
-  }
+    // initialize options with middlewares, models, and routes
+    const options = {
+      middlewares: [],
+      models: [AuthModel],
+    };
+  } catch (err) {}
 })();
