@@ -1,18 +1,29 @@
 {
   "name": "keeno-test",
-  "version": "0.0.1",
-  "description": "Allows easy testing of Rest API endpoints",
+  "version": "0.1.0",
+  "description": "Used to test Rest API server endpoints",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miketerry-org/keeno-test.git"
+  },
   "keywords": [
     "keeno",
     "test",
+    "testing",
     "rest",
     "api",
-    "json"
+    "json",
+    "express",
+    "endpoints"
   ],
   "author": "Mike Terry",
-  "license": "ISCMIT"
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miketerry-org/keeno-test/issues"
+  },
+  "homepage": "https://github.com/miketerry-org/keeno-test#readme"
 }
