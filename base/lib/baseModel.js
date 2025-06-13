@@ -7,22 +7,28 @@ class BaseModel {
   #db;
   #name;
 
-  constructor(tenant, name) {
+  constructor(tenant) {
     if (!tenant) {
       throw new Error(`"tenant" parameter is missing`);
     }
+
     if (!tenant.db) {
       throw new Error(
-        `Tenant "${tenant.site_title}" is missing "db" connection`
+        `Tenant "${
+          tenant.site_title || tenant.domain
+        }" is missing "db" connection`
       );
-      if (!name || name.trim() !== "") {
-        throw new Error(`Tenant "${tenant.site_title}" is missing model name`);
-      }
     }
 
     this.#tenant = tenant;
     this.#db = tenant.db;
-    this.#name = name;
+
+    // Default name derived from class name: remove "Model" suffix and lowercase
+    const className = this.constructor.name;
+    const baseName = className.endsWith("Model")
+      ? className.slice(0, -5)
+      : className;
+    this.#name = baseName.toLowerCase();
   }
 
   get tenant() {
@@ -35,6 +41,13 @@ class BaseModel {
 
   get name() {
     return this.#name;
+  }
+
+  set name(value) {
+    if (typeof value !== "string" || value.trim() === "") {
+      throw new Error("Model name must be a non-empty string");
+    }
+    this.#name = value.trim();
   }
 
   // Abstract interface

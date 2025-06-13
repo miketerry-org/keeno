@@ -12,6 +12,7 @@ const extractFilename = require("./lib/extractFilename");
 const extractFilePath = require("./lib/extractFilePath");
 const getDestinationFiles = require("./lib/getDestinationFiles");
 const runCommand = require("./lib/runCommand");
+const response = require("./lib/response");
 
 const {
   envMode,
@@ -149,6 +150,7 @@ module.exports = {
   coercePrimitive,
   getDestinationFiles,
   runCommand,
+  response,
 
   get userRoles() {
     return getUserRoles();

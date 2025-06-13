@@ -1,61 +1,69 @@
+// tenantManager.js:
+
 "use strict";
 
-// Load all necessary modules
+// load all necessary modules
 const system = require("keeno-system");
 const Schema = require("keeno-schema");
 const createTenantServices = require("./createTenantServices");
+const BaseModel = require("./baseModel");
 
-// Destructure necessary data types
 const { booleanType, emailType, enumType, integerType, stringType } =
   Schema.types;
 
-//!!Mike this should be moved to keeno-system and support full and abbreviated names
 const envModes = ["development", "testing", "production"];
 
-/**
- * Manages multi-tenant initialization, lookup, and middleware support.
- */
 class TenantManager {
   constructor() {
     this._tenants = [];
     this._tenantMap = new Map();
     this.tenantNotFoundTemplate = "tenant_not_found";
     this._services = null;
+    this._options = {};
     this._throwOnError = false;
   }
 
-  /**
-   * Returns the number of tenants currently registered.
-   * @returns {number}
-   */
   get length() {
     return this._tenants.length;
   }
 
-  /**
-   * Initializes the tenant manager with tenants, shared services, and options.
-   * @param {Object[]} tenants - Array of tenant configuration objects.
-   * @param {Object} [services={}] - Services to be applied to all tenants.
-   * @param {Object} [options={}] - Additional options like `throwOnError`.
-   */
   async initialize(tenants = [], services = {}, options = {}) {
     this._services = services;
+    this._options = options;
     this._throwOnError = options.throwOnError || false;
 
-    // Clear any previous state
     this._tenants = [];
     this._tenantMap.clear();
 
-    // Add tenants with the shared services object
     for (const tenant of tenants) {
-      await this.add(tenant, services);
+      await this.add(tenant, services, options);
     }
   }
 
-  /**
-   * Applies new services to all tenants currently registered.
-   * @param {Object} servicesObj - The services object to apply.
-   */
+  async add(tenant, services = this._services, options = this._options) {
+    if (!tenant || typeof tenant !== "object") {
+      return;
+    }
+
+    const { validated, errors } = this.validate(tenant);
+    if (errors && errors.length > 0) {
+      const message = errors.map(err => err.message).join(", ");
+      system.fatal(
+        `Invalid tenant configuration, (${tenant.domain}) ${message}`
+      );
+    }
+
+    try {
+      const enriched = await this._enrichTenant(validated, services);
+      this._tenants.push(enriched);
+      this._cacheTenant(enriched);
+    } catch (err) {
+      const msg = `Failed to add tenant "${tenant.domain}": ${err.message}`;
+      if (this._throwOnError) throw new Error(msg);
+      console.error(msg);
+    }
+  }
+
   async createServices(servicesObj = {}) {
     const enrichedTenants = [];
 
@@ -66,9 +74,7 @@ class TenantManager {
         this._cacheTenant(enriched);
       } catch (err) {
         const msg = `Failed to create services for tenant "${tenant.domain}": ${err.message}`;
-        if (this._throwOnError) {
-          throw new Error(msg);
-        }
+        if (this._throwOnError) throw new Error(msg);
         console.error(msg);
       }
     }
@@ -76,68 +82,65 @@ class TenantManager {
     this._tenants = enrichedTenants;
   }
 
-  /**
-   * Returns a shallow copy of all registered tenants.
-   * @returns {Object[]}
-   */
   getAll() {
     return [...this._tenants];
   }
 
-  /**
-   * Finds a tenant by its domain name.
-   * @param {string} domain - The domain to search for.
-   * @returns {Object|undefined}
-   */
   findByDomain(domain) {
-    // Check input validity
     if (!domain) {
       return undefined;
     }
-
     return this._tenantMap.get(domain.toLowerCase());
   }
 
-  /**
-   * Adds a single tenant to the manager, enriching it with services.
-   * Can override global services per tenant.
-   * @param {Object} tenant - A tenant configuration object.
-   * @param {Object} [services=this._services] - Optional services specific to this tenant.
-   */
-  async add(tenant, services = this._services) {
-    // Validate input type
-    if (!tenant || typeof tenant !== "object") {
-      return;
-    }
-
-    // Validate tenant schema
-    const { validated, errors } = this.validate(tenant);
-    if (errors && errors.length > 0) {
-      const message = errors.map(err => err.message).join(", ");
-      system.fatal(
-        `Invalid tenant configuration, (${tenant.domain}) ${message}`
+  viewMiddleware(req, res, next) {
+    const tenant = this.findByDomain(req.hostname);
+    if (!tenant) {
+      return this._handleMissingTenant(
+        res,
+        "view",
+        404,
+        `Tenant "${req.hostname}" not found`
       );
     }
-
-    try {
-      const enriched = services
-        ? await this._enrichTenant(validated, services)
-        : validated;
-      this._tenants.push(enriched);
-      this._cacheTenant(enriched);
-    } catch (err) {
-      const msg = `Failed to add tenant "${tenant.domain}": ${err.message}`;
-      if (this._throwOnError) {
-        throw new Error(msg);
-      }
-      console.error(msg);
+    if (!tenant.db) {
+      return this._handleMissingTenant(
+        res,
+        "view",
+        500,
+        `Tenant "${tenant.domain}" is misconfigured (missing database)`
+      );
     }
+    req.tenant = tenant;
+    next();
   }
 
-  /**
-   * Returns a validation schema definition for tenant config.
-   * Subclasses may override or extend this.
-   */
+  restMiddleware(req, res, next) {
+    const tenant = this.findByDomain(req.hostname);
+    if (!tenant) {
+      return this._handleMissingTenant(
+        res,
+        "json",
+        404,
+        `Tenant "${req.hostname}" not found`
+      );
+    }
+    if (!tenant.db) {
+      return this._handleMissingTenant(
+        res,
+        "json",
+        500,
+        `Tenant "${tenant.domain}" is misconfigured (missing database)`
+      );
+    }
+    req.tenant = tenant;
+    next();
+  }
+
+  validate(tenant) {
+    return new Schema(this.schemaDefinition()).validate(tenant);
+  }
+
   schemaDefinition() {
     return {
       id: integerType({ min: 1, max: 100000, required: true }),
@@ -160,119 +163,58 @@ class TenantManager {
     };
   }
 
-  /**
-   * Validates a tenant config using the defined schema.
-   * @param {Object} tenant - The tenant config object.
-   * @returns {{ validated: Object, errors: Array }}
-   */
-  validate(tenant) {
-    return new Schema(this.schemaDefinition()).validate(tenant);
-  }
-
-  /**
-   * Express middleware for view-based routes. Attaches tenant to `req.tenant`.
-   * Sends 404 or 500 view if tenant is not found or misconfigured.
-   */
-  viewMiddleware(req, res, next) {
-    const tenant = this.findByDomain(req.hostname);
-
-    // Handle not found
-    if (!tenant) {
-      return this._handleMissingTenant(
-        res,
-        "view",
-        404,
-        `Tenant "${req.hostname}" not found`
-      );
-    }
-
-    // Handle misconfigured (no DB)
-    if (!tenant.db) {
-      return this._handleMissingTenant(
-        res,
-        "view",
-        500,
-        `Tenant "${tenant.domain}" is misconfigured (missing database)`
-      );
-    }
-
-    req.tenant = tenant;
-    next();
-  }
-
-  /**
-   * Express middleware for API routes. Attaches tenant to `req.tenant`.
-   * Sends 404 or 500 JSON if tenant is not found or misconfigured.
-   */
-  restMiddleware(req, res, next) {
-    const tenant = this.findByDomain(req.hostname);
-
-    // Handle not found
-    if (!tenant) {
-      return this._handleMissingTenant(
-        res,
-        "json",
-        404,
-        `Tenant "${req.hostname}" not found`
-      );
-    }
-
-    // Handle misconfigured (no DB)
-    if (!tenant.db) {
-      return this._handleMissingTenant(
-        res,
-        "json",
-        500,
-        `Tenant "${tenant.domain}" is misconfigured (missing database)`
-      );
-    }
-
-    req.tenant = tenant;
-    next();
-  }
-
-  /**
-   * Internal helper: enriches a tenant with services and validates required properties.
-   * @private
-   * @param {Object} tenant - Raw tenant configuration object.
-   * @param {Object} services - Services to apply to the tenant.
-   * @returns {Promise<Object>} - The enriched tenant.
-   */
   async _enrichTenant(tenant, services) {
     const enriched = await createTenantServices(tenant, services);
 
-    if (!enriched.log) {
-      enriched.log = console;
-    }
-
+    if (!enriched.log) enriched.log = console;
     if (!enriched.db) {
       throw new Error(
         `Tenant "${tenant.domain}" did not initialize a database connection`
       );
     }
 
+    // Initialize and bind models
+    if (Array.isArray(this._options.models)) {
+      const modelMap = new Map();
+
+      for (const ModelClass of this._options.models) {
+        if (typeof ModelClass !== "function") {
+          throw new Error(`Invalid model class in models array`);
+        }
+
+        const instance = new ModelClass(enriched);
+
+        if (!(instance instanceof BaseModel)) {
+          throw new Error(`${ModelClass.name} must extend BaseModel`);
+        }
+
+        const name = instance.name;
+        if (!name || typeof name !== "string") {
+          throw new Error(`Model "${ModelClass.name}" returned invalid name`);
+        }
+
+        modelMap.set(name, instance);
+      }
+
+      enriched.models = function getModel(name) {
+        if (!modelMap.has(name)) {
+          throw new Error(
+            `Model "${name}" is not registered for tenant "${enriched.domain}"`
+          );
+        }
+        return modelMap.get(name);
+      };
+    }
+
     return enriched;
   }
 
-  /**
-   * Internal helper: caches the tenant using its domain (lowercased) as the key.
-   * @private
-   * @param {Object} tenant - Enriched tenant with a `.domain` property.
-   */
   _cacheTenant(tenant) {
     if (tenant.domain && typeof tenant.domain === "string") {
       this._tenantMap.set(tenant.domain.toLowerCase(), tenant);
     }
   }
 
-  /**
-   * Internal helper: handles rendering or JSON error response depending on context.
-   * @private
-   * @param {Object} res - Express response object.
-   * @param {"view"|"json"} type - Response type to send.
-   * @param {number} status - HTTP status code.
-   * @param {string} message - Error message.
-   */
   _handleMissingTenant(res, type, status, message) {
     if (type === "view" && typeof res.render === "function") {
       return res

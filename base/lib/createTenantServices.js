@@ -2,8 +2,15 @@
 
 "use strict";
 
-const createReadOnlyObject = require("./createReadOnlyObject");
-
+/**
+ * Initializes services (e.g., db, log) for a given tenant object.
+ * Each service factory in the `services` object will be called
+ * with the tenant and attached directly to the tenant object.
+ *
+ * @param {object} tenant - The tenant to enrich.
+ * @param {object} services - An object of service factories (functions).
+ * @returns {Promise<object>} - The enriched tenant object.
+ */
 async function createTenantServices(tenant, services = {}) {
   for (const key of Object.keys(services)) {
     const createService = services[key];
@@ -16,15 +23,12 @@ async function createTenantServices(tenant, services = {}) {
       throw new Error(`Service "${key}" already exists on tenant.`);
     }
 
-    // invoke the service creation
+    // Create and attach the service
     const service = await createService(tenant);
-
-    // assign the initialized service to the tenant
     tenant[key] = service;
   }
 
-  // return a read only version of the tenant object
-  return createReadOnlyObject(tenant);
+  return tenant;
 }
 
 module.exports = createTenantServices;

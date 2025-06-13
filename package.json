@@ -1,33 +1,13 @@
 {
   "name": "keeno",
-  "version": "0.1.0",
-  "private": true,
-  "main": "index.js",
+  "version": "1.0.0",
   "description": "",
-  "keywords": [],
-  "author": "Mike Terry",
-  "license": "MIT",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "workspaces": [
-    "env",
-    "mongodb",
-    "mvc",
-    "nodemailer",
-    "rest",
-    "rest_starter",
-    "schema",
-    "system",
-    "tenantmanager"
-  ],
-  "devDependencies": {
-    "keeno-base": "workspace:*",
-    "keeno-env": "workspace:*",
-    "keeno-mongodb": "workspace:*",
-    "keeno-nodemailer": "workspace:*",
-    "keeno-rest": "workspace:*",
-    "keeno-schema": "workspace:*",
-    "keeno-system": "workspace:*"
-  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.1"
 }

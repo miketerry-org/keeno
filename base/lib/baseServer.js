@@ -1,3 +1,5 @@
+// baseServer.js:
+
 "use strict";
 
 // Load required modules
@@ -104,7 +106,6 @@ class BaseServer {
     await this.initRateLimit();
     await this.initLogger();
     await this.initTenantManager();
-    await initModels();
     await this.initMiddlewares();
     await this.initHealthCheck();
     await this.initRouters();
@@ -165,8 +166,6 @@ class BaseServer {
     );
   }
 
-  async initModels() {}
-
   /**
    * Registers any user-defined Express middlewares.
    * Expects `services.middlewares` to be an array of functions (if defined).
@@ -186,7 +185,7 @@ class BaseServer {
   }
 
   async initHealthCheck() {
-    // To be implemented: health check endpoint (e.g. /healthz)
+    console.log("health check");
   }
 
   async initRouters() {

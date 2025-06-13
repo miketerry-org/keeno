@@ -1,8 +1,9 @@
-// authModel.js
+// authModel.js:
 
 "use strict";
 
-const { MongooseModel } = require("keeno-mongodb");
+// Load all necessary modules
+const MongooseModel = require("./mongooseModel");
 const authSchema = require("./authSchema");
 
 /**
@@ -16,12 +17,13 @@ const authSchema = require("./authSchema");
  */
 class AuthModel extends MongooseModel {
   /**
-   * Constructs a new instance of the AuthModel.
+   * Returns the Mongoose schema used for the "auth" model.
+   * Overrides the abstract schema() method defined in MongooseModel.
    *
-   * @param {object} tenant - The tenant object containing the Mongoose `db` instance.
+   * @returns {import('mongoose').Schema} The Mongoose schema instance.
    */
-  constructor(tenant) {
-    super(tenant, "auth", authSchema);
+  schema() {
+    return authSchema;
   }
 
   /**

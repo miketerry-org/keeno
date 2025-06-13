@@ -8,6 +8,9 @@ const { BaseModel } = require("keeno-base");
  * A base model for Mongoose documents integrated with tenant-aware databases.
  * Wraps core Mongoose operations (CRUD) in a consistent API.
  *
+ * Subclasses must override the `schema()` method to return a Mongoose schema.
+ *
+ * @abstract
  * @class
  * @extends BaseModel
  */
@@ -16,16 +19,40 @@ class MongooseModel extends BaseModel {
   #underlyingModel;
 
   /**
-   * Constructs a new MongooseModel.
+   * Constructs a new tenant-scoped Mongoose model.
    *
-   * @param {object} tenant - The tenant object containing the Mongoose `db` instance.
-   * @param {string} name - The name of the model.
-   * @param {import('mongoose').Schema} schema - The Mongoose schema to use for the model.
+   * @param {object} tenant - The tenant object containing a connected Mongoose `db` instance.
+   * @throws {Error} If the schema is not implemented in the subclass.
    */
-  constructor(tenant, name, schema) {
-    super(tenant, name);
+  constructor(tenant) {
+    super(tenant);
+
+    const schema = this.schema();
+
+    if (!schema || typeof schema !== "object") {
+      throw new Error(
+        `Missing or invalid schema in "${this.constructor.name}". ` +
+          `Subclasses must override the schema() method.`
+      );
+    }
+
+    const modelName = this.name;
+
     this.#underlyingModel =
-      tenant.db.models[name] || tenant.db.model(name, schema);
+      tenant.db.models[modelName] || tenant.db.model(modelName, schema);
+  }
+
+  /**
+   * Subclasses must override this to provide a Mongoose schema.
+   *
+   * @abstract
+   * @returns {import('mongoose').Schema}
+   * @throws {Error} If not overridden by subclass.
+   */
+  schema() {
+    throw new Error(
+      `Model schema() not implemented for class "${this.constructor.name}"`
+    );
   }
 
   /**

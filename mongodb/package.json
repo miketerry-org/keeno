@@ -8,6 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "keeno-schema": "workspace:*",
     "keeno-system": "workspace:*",
     "mongodb": "^6.16.0",
