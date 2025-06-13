@@ -58,6 +58,9 @@ importers:
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
+      keeno-base:
+        specifier: workspace:*
+        version: link:../base
       keeno-schema:
         specifier: workspace:*
         version: link:../schema
@@ -112,9 +115,6 @@ importers:
       keeno-env:
         specifier: workspace:*
         version: link:../env
-      keeno-request:
-        specifier: workspace:*
-        version: link:../request
       keeno-schema:
         specifier: workspace:*
         version: link:../schema
@@ -136,9 +136,6 @@ importers:
       keeno-mongodb:
         specifier: workspace:*
         version: link:../mongodb
-      keeno-nodemailer:
-        specifier: workspace:*
-        version: link:../nodemailer
       keeno-rest:
         specifier: workspace:*
         version: link:../rest

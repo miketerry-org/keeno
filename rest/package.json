@@ -33,7 +33,6 @@
     "keeno-env": "workspace:*",
     "keeno-schema": "workspace:*",
     "keeno-system": "workspace:*",
-    "keeno-request": "workspace:*",
     "morgan": "^1.10.0"
   }
 }

@@ -1,4 +1,4 @@
-// index.js: keeno-test rest api tester
+// index.js:
 
 "use strict";
 
@@ -15,10 +15,6 @@ function request(baseURL, context = {}) {
 }
 
 class TestRequest {
-  /**
-   * @param {string} baseURL
-   * @param {Object} context
-   */
   constructor(baseURL, context = {}) {
     this.baseURL = baseURL;
     this.context = context;
@@ -30,78 +26,53 @@ class TestRequest {
     this.assertions = [];
   }
 
-  /** @param {string} path */
   get(path) {
     this.method = "GET";
     this.path = path;
     return this;
   }
 
-  /** @param {string} path */
   post(path) {
     this.method = "POST";
     this.path = path;
     return this;
   }
 
-  /** @param {string} path */
   put(path) {
     this.method = "PUT";
     this.path = path;
     return this;
   }
 
-  /** @param {string} path */
   patch(path) {
     this.method = "PATCH";
     this.path = path;
     return this;
   }
 
-  /** @param {string} path */
   delete(path) {
     this.method = "DELETE";
     this.path = path;
     return this;
   }
 
-  /**
-   * Add query parameters to the request.
-   * @param {Object} params - Key-value pairs for the query string.
-   * @returns {TestRequest}
-   */
   query(params) {
     const str = new URLSearchParams(params).toString();
     this.queryParams += (this.queryParams ? "&" : "?") + str;
     return this;
   }
 
-  /**
-   * Set a JSON request body.
-   * @param {Object} body - The JSON payload to send.
-   * @returns {TestRequest}
-   */
   send(body) {
     this.body = JSON.stringify(body);
     this.headers["Content-Type"] = "application/json";
     return this;
   }
 
-  /**
-   * Set a request header.
-   * @param {string} key
-   * @param {string} value
-   * @returns {TestRequest}
-   */
   setHeader(key, value) {
     this.headers[key] = value;
     return this;
   }
 
-  /**
-   * Attach stored cookie from context to request.
-   * @returns {TestRequest}
-   */
   sendCookieFromContext() {
     if (this.context.cookie) {
       this.headers["Cookie"] = this.context.cookie;
@@ -109,11 +80,6 @@ class TestRequest {
     return this;
   }
 
-  /**
-   * Assert the expected HTTP status code.
-   * @param {number} code
-   * @returns {TestRequest}
-   */
   expectStatus(code) {
     this.assertions.push(async res => {
       if (res.status !== code) {
@@ -124,29 +90,27 @@ class TestRequest {
   }
 
   /**
-   * Assert that a response header equals an expected value.
+   * Assert that a response header equals or includes an expected value.
    * @param {string} key
    * @param {string} expected
+   * @param {boolean} [exact=true] - If false, allows partial match (e.g., Content-Type).
    * @returns {TestRequest}
    */
-  expectHeader(key, expected) {
+  expectHeader(key, expected, exact = true) {
     this.assertions.push(async res => {
       const actual = res.headers.get(key.toLowerCase());
-      if (actual !== expected) {
+      const match = exact ? actual === expected : actual?.includes(expected);
+      if (!match) {
         throw new Error(
-          `Expected header '${key}' = '${expected}', got '${actual}'`
+          `Expected header '${key}' ${
+            exact ? "=" : "to include"
+          } '${expected}', got '${actual}'`
         );
       }
     });
     return this;
   }
 
-  /**
-   * Assert a specific field in the JSON body.
-   * @param {string} key - Field to check.
-   * @param {*} [expected] - Optional value to match against.
-   * @returns {TestRequest}
-   */
   expectBodyField(key, expected) {
     this.assertions.push(async (res, json) => {
       if (!(key in json)) throw new Error(`Expected body to have key '${key}'`);
@@ -159,11 +123,6 @@ class TestRequest {
     return this;
   }
 
-  /**
-   * Deep-equality check of the entire JSON body.
-   * @param {Object} expected
-   * @returns {TestRequest}
-   */
   expectBodyEquals(expected) {
     this.assertions.push(async (res, json) => {
       const actualStr = JSON.stringify(json);
@@ -177,13 +136,8 @@ class TestRequest {
     return this;
   }
 
-  /**
-   * Assert a raw text body response.
-   * @param {string} expectedText
-   * @returns {TestRequest}
-   */
   expectTextBody(expectedText) {
-    this.assertions.push(async (res, _) => {
+    this.assertions.push(async res => {
       const text = await res.text();
       if (text !== expectedText) {
         throw new Error(
@@ -194,22 +148,11 @@ class TestRequest {
     return this;
   }
 
-  /**
-   * Add a custom expectation function.
-   * @param {(res: Response, json: Object) => Promise<void> | void} fn
-   * @returns {TestRequest}
-   */
   expect(fn) {
     this.assertions.push(fn);
     return this;
   }
 
-  /**
-   * Save a value from the JSON body to the context.
-   * @param {string} bodyKey - The JSON field to read.
-   * @param {string} contextKey - The key to store in context.
-   * @returns {TestRequest}
-   */
   saveBodyFieldToContext(bodyKey, contextKey) {
     this.assertions.push(async (res, json) => {
       this.context[contextKey] = json[bodyKey];
@@ -217,40 +160,65 @@ class TestRequest {
     return this;
   }
 
-  /**
-   * Save a specific cookie from the Set-Cookie response header into context.
-   * @param {string} cookieName
-   * @returns {TestRequest}
-   */
   saveCookieFromResponse(cookieName) {
     this.assertions.push(async res => {
       const raw = res.headers.raw()["set-cookie"];
       if (!raw) return;
       const cookie = raw.find(c => c.startsWith(`${cookieName}=`));
       if (cookie) {
-        this.context.cookie = cookie.split(";")[0]; // e.g. connect.sid=abc123
+        this.context.cookie = cookie.split(";")[0];
       }
     });
     return this;
   }
 
-  /**
-   * Execute the request and run all chained assertions.
-   * @returns {Promise<{res: Response, json: Object, context: Object}>}
-   */
-  async run() {
+  async run(showDetails = false) {
     const url = `${this.baseURL}${this.path}${this.queryParams}`;
-    const res = await fetch(url, {
+
+    const requestOptions = {
       method: this.method,
       headers: this.headers,
       body: this.body,
-    });
+    };
+
+    if (showDetails) {
+      console.log("====== REQUEST ======");
+      console.log("METHOD:", this.method);
+      console.log("URL:", url);
+      console.log("HEADERS:", this.headers);
+      if (this.body) {
+        try {
+          console.log("BODY:", JSON.parse(this.body));
+        } catch {
+          console.log("BODY:", this.body);
+        }
+      }
+      if (this.context.cookie) {
+        console.log("COOKIE:", this.context.cookie);
+      }
+    }
+
+    const res = await fetch(url, requestOptions);
 
     let json = {};
+    let text = "";
     try {
       json = await res.clone().json();
     } catch {
-      // Not JSON, that's fine
+      text = await res.clone().text();
+    }
+
+    if (showDetails) {
+      console.log("====== RESPONSE ======");
+      console.log("STATUS:", res.status);
+      console.log("HEADERS:", Object.fromEntries(res.headers.entries()));
+      if (Object.keys(json).length > 0) {
+        console.log("JSON BODY:", json);
+      } else if (text) {
+        console.log("TEXT BODY:", text);
+      } else {
+        console.log("BODY: <empty>");
+      }
     }
 
     for (const assertFn of this.assertions) {

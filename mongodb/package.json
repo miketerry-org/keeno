@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "keeno-base": "workspace:*",
     "keeno-schema": "workspace:*",
     "keeno-system": "workspace:*",
     "mongodb": "^6.16.0",

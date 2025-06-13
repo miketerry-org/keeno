@@ -7,7 +7,7 @@
     "dev": "NODE_ENV=dev nodemon index.js",
     "debug": "NODE_ENV=debug nodemon index.js",
     "encrypt": "./_encrypt_all.sh",
-    "test": "jest --watch"
+    "test": "jest --watch --bail"
   },
   "keywords": [
     "rest",
@@ -20,7 +20,6 @@
     "keeno-base": "workspace:*",
     "keeno-env": "workspace:*",
     "keeno-mongodb": "workspace:*",
-    "keeno-nodemailer": "workspace:*",
     "keeno-rest": "workspace:*",
     "keeno-schema": "workspace:*",
     "keeno-system": "workspace:*"

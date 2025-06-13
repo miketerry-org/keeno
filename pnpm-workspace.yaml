@@ -2,10 +2,9 @@ packages:
   - base
   - env
   - mongodb
-  - mvc
   - nodemailer
   - request
   - rest
-  - rest_starter
   - schema
   - system
+  - rest-starter
