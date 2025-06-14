@@ -11,6 +11,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.11.1",
   "dependencies": {
+    "keeno-base": "workspace:*",
     "nodemailer": "^7.0.3"
   }
 }

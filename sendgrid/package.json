@@ -1,0 +1,32 @@
+{
+  "name": "keeno-sendgrid",
+  "version": "0.1.0",
+  "description": "Implements sending of emails with SendGrid",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miketerry-org/keeno-sendgrid.git"
+  },
+  "keywords": [
+    "keeno",
+    "sendgrid",
+    "email",
+    "express",
+    "multitenant-express"
+  ],
+  "author": "Mike Terry",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miketerry-org/keeno-sendgrid/issues"
+  },
+  "homepage": "https://github.com/miketerry-org/keeno-sendgrid#readme",
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
+    "keeno-base": "workspace:*",
+    "keeno-schema": "workspace:*",
+    "keeno-system": "workspace:*"
+  }
+}
