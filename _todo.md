@@ -1,7 +1,3 @@
-nodemaster.com
-nodefreak.com
-nodefanboy.com
-
 #todo:
 
 #keeno-config
@@ -40,10 +36,10 @@ nodefanboy.com
 </ul>
 
 - skip cli package until all others are complete
-<!-- - finish keeno-config -->
-- - finish keeno-express
-- finish keeno-mongodb
-- finish keeno-nodemailer
+  <!-- - finish keeno-env -->
+  <!-- - - finish keeno-base -->
+      <!-- - finish keeno-mongodb -->
+      <!-- - finish keeno-nodemailer -->
 - implement keeno-tutorials-\*
 - ***
 
