@@ -4,7 +4,12 @@
 
 // load all necessary modules
 const nodemailer = require("nodemailer");
-const { BaseEmailer } = require("./baseEmailer");
+const { BaseEmailer } = require("keeno-base");
+const system = require("keeno-system");
+const Schema = require("keeno-schema");
+
+// destructure needed data types
+const { stringType, booleanType, integerType } = Schema.types;
 
 /**
  * NodeEmailer is a concrete implementation of BaseEmailer using the nodemailer library.
@@ -104,4 +109,38 @@ class NodeEmailer extends BaseEmailer {
   }
 }
 
-module.exports = { NodeEmailer };
+/**
+ * Creates and initializes a NodeEmailer instance after validating tenant config.
+ * @param {Object} tenant - Tenant config containing SMTP-related values.
+ * @returns {Promise<NodeEmailer>} - A ready-to-use NodeEmailer instance.
+ * @throws {Error} - Throws if validation fails or emailer cannot initialize.
+ */
+async function CreateNodeEmailer(tenant) {
+  const { validated, errors } = new Schema({
+    smtp_host: stringType({ min: 1, max: 255, required: true }),
+    smtp_port: numberType({ min: 1, max: 65535, required: true }),
+    smtp_secure: booleanType({ required: true }),
+    smtp_username: stringType({ min: 1, max: 255, required: true }),
+    smtp_password: stringType({ min: 1, max: 255, required: true }),
+  }).validate(tenant);
+
+  if (errors.length > 0) {
+    const message = errors.map(e => e.message).join(", ");
+    system.log.error(`SMTP config validation failed: ${message}`);
+    throw new Error(`SMTP config invalid: ${message}`);
+  }
+
+  const emailer = new NodeEmailer();
+  try {
+    await emailer.initialize(validated);
+    system.log.info(
+      `NodeEmailer initialized for SMTP host ${validated.smtp_host}`
+    );
+    return emailer;
+  } catch (err) {
+    system.log.error(`NodeEmailer initialization failed: ${err.message}`);
+    throw new Error(`Failed to initialize NodeEmailer: ${err.message}`);
+  }
+}
+
+module.exports = { NodeEmailer, CreateNodeEmailer };

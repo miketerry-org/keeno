@@ -12,6 +12,8 @@
   "packageManager": "pnpm@10.11.1",
   "dependencies": {
     "keeno-base": "workspace:*",
+    "keeno-schema": "workspace:*",
+    "keeno-system": "workspace:*",
     "nodemailer": "^7.0.3"
   }
 }

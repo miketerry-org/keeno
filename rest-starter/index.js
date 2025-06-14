@@ -9,6 +9,7 @@ const { loadConfigFiles } = require("keeno-base");
 const { RestServer } = require("keeno-rest");
 const { createDB, createLog, AuthModel } = require("keeno-mongodb");
 const authRouter = require("./lib/authRouter");
+const { createNodeEmailer } = require("keeno-nodemailer");
 
 (async () => {
   try {
@@ -29,6 +30,7 @@ const authRouter = require("./lib/authRouter");
     const services = {
       db: createDB,
       log: createLog,
+      emailer: createNodeEmailer,
     };
 
     // initialize options with middlewares, models, and routers

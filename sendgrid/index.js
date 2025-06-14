@@ -2,8 +2,14 @@
 
 "use strict";
 
+// load all necessary modules
 const sgMail = require("@sendgrid/mail");
 const { BaseEmailer } = require("./baseEmailer");
+const system = require("keeno-system");
+const Schema = require("keeno-schema");
+
+// destructure needed data types
+const { stringType } = Schema.types;
 
 /**
  * SendGridEmailer is a concrete implementation of BaseEmailer using SendGrid's mail API.
@@ -97,4 +103,32 @@ class SendGridEmailer extends BaseEmailer {
   }
 }
 
-module.exports = { SendGridEmailer };
+/**
+ * Creates and initializes a SendGridEmailer instance after validating tenant config.
+ * @param {Object} tenant - Tenant config containing the SendGrid API key.
+ * @returns {Promise<SendGridEmailer>} - A ready-to-use SendGridEmailer instance.
+ * @throws {Error} - Throws if validation fails or initialization fails.
+ */
+async function CreateSendGridEmailer(tenant) {
+  const { validated, errors } = new Schema({
+    sendgrid_api_key: stringType({ min: 10, max: 255, required: true }),
+  }).validate(tenant);
+
+  if (errors.length > 0) {
+    const message = errors.map(e => e.message).join(", ");
+    system.log.error(`SendGrid config validation failed: ${message}`);
+    throw new Error(`SendGrid config invalid: ${message}`);
+  }
+
+  const emailer = new SendGridEmailer();
+  try {
+    await emailer.initialize(validated);
+    system.log.info(`SendGridEmailer initialized successfully`);
+    return emailer;
+  } catch (err) {
+    system.log.error(`SendGridEmailer initialization failed: ${err.message}`);
+    throw new Error(`Failed to initialize SendGridEmailer: ${err.message}`);
+  }
+}
+
+module.exports = { SendGridEmailer, CreateSendGridEmailer };
