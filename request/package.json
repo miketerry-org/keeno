@@ -1,8 +1,30 @@
 {
   "name": "keeno-request",
   "version": "0.1.1",
+  "description": "Testing of Rest API servers",
   "main": "index.js",
   "dependencies": {
     "node-fetch": "^2.7.0"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miketerry-org/keeno-request.git"
+  },
+  "keywords": [
+    "keeno",
+    "rest",
+    "api",
+    "testing",
+    "test"
+  ],
+  "author": "Mike Terry",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miketerry-org/keeno-request/issues"
+  },
+  "homepage": "https://github.com/miketerry-org/keeno-request#readme"
 }
