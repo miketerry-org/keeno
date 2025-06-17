@@ -1,18 +1,20 @@
-// index.js:
+// index.js: // keeno-base
 
 "use strict";
 
-const BaseModel = require("./lib/baseModel");
-const { BaseEmailer, EmailMessage } = require("./lib/baseEmailer");
-const BaseServer = require("./lib/baseServer");
+// load all necessary modules
 const asyncHandler = require("./lib/asyncHandler");
-const loadConfigFiles = require("./lib/loadConfigFiles");
+const BaseEmailer = require("./lib/baseEmailer");
+const BaseModel = require("./lib/baseModel");
+const BaseServer = require("./lib/baseServer");
+const loadServerConfig = require("./lib/loadServerConfig");
+const loadTenantConfigs = require("./lib/loadTenantConfigs");
 
 module.exports = {
-  BaseModel,
-  BaseEmailer,
-  EmailMessage,
-  BaseServer,
   asyncHandler,
-  loadConfigFiles,
+  BaseEmailer,
+  BaseModel,
+  BaseServer,
+  loadServerConfig,
+  loadTenantConfigs,
 };

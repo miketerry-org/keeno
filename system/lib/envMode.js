@@ -2,43 +2,51 @@
 
 "use strict";
 
-/**
- * Normalized environment mode (e.g., "dev", "production", etc.)
- * Defaults to "dev" if NODE_ENV is not set.
- * @type {string}
- */
-const envMode = process.env.NODE_ENV
-  ? process.env.NODE_ENV.toLowerCase()
-  : "dev";
+// Grab raw NODE_ENV and normalize to lowercase
+const rawEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toLowerCase() : null;
 
-/**
- * True if running in debug or debugging mode.
- * @type {boolean}
- */
-const isDebugging = envMode === "debug" || envMode === "debugging";
+// Supported environment aliases mapped to canonical values
+const map = {
+  dev: "development",
+  development: "development",
+  prod: "production",
+  production: "production",
+  test: "test",
+  testing: "test",
+  debug: "debug",
+  debugging: "debug",
+};
 
-/**
- * True if running in development mode.
- * @type {boolean}
- */
-const isDevelopment = envMode === "dev" || envMode === "development";
+// Fatal error if NODE_ENV is not defined
+if (!rawEnv) {
+  console.error(
+    "Fatal: NODE_ENV is not set. Please specify the environment mode explicitly."
+  );
+  process.exit(1);
+}
 
-/**
- * True if running in production mode.
- * @type {boolean}
- */
-const isProduction = envMode === "prod" || envMode === "production";
+// Canonical environment mode
+const envMode = map[rawEnv];
 
-/**
- * True if running in test mode.
- * @type {boolean}
- */
-const isTesting = envMode === "test" || envMode === "testing";
+if (!envMode) {
+  console.error(
+    `Fatal: Unrecognized NODE_ENV value "${rawEnv}". Allowed values are: ${Object.keys(
+      map
+    ).join(", ")}`
+  );
+  process.exit(1);
+}
+
+// Boolean flags for easy conditional logic
+const isDevelopment = envMode === "development";
+const isProduction = envMode === "production";
+const isTesting = envMode === "test";
+const isDebugging = envMode === "debug";
 
 module.exports = {
   envMode,
-  isDebugging,
   isDevelopment,
   isProduction,
   isTesting,
+  isDebugging,
 };

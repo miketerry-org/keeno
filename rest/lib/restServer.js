@@ -55,6 +55,7 @@ class RestServer extends BaseServer {
    * Example: `{ path: "/auth", router: authRouter }`
    */
   async initCustomRoutes() {
+    console.debug("initCustomRoutes", this.options.routes);
     if (Array.isArray(this.options.routes)) {
       this.options.routes.forEach(({ path, router }) => {
         console.info(`Mounting custom route at: ${path}`);

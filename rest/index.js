@@ -3,7 +3,14 @@
 "use strict";
 
 // load all necessary modules
+const loadServerConfig = require("./lib/loadServerConfig");
+const loadTenantConfigs = require("./lib/loadTenantConfigs");
 const RestServer = require("./lib/restServer");
-const AuthRouter = require("./lib/auth/router");
+const { authRouter } = require("./lib/auth/authRouter");
 
-module.exports = { RestServer, AuthRouter };
+module.exports = {
+  loadServerConfig,
+  loadTenantConfigs,
+  RestServer,
+  authRouter,
+};

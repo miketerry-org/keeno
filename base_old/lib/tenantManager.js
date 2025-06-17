@@ -20,7 +20,6 @@ class TenantManager {
     this.tenantNotFoundTemplate = "tenant_not_found";
     this._services = null;
     this._options = {};
-    this._throwOnError = false;
   }
 
   get length() {
@@ -28,9 +27,9 @@ class TenantManager {
   }
 
   async initialize(tenants = [], services = {}, options = {}) {
+    console.log("tenantManager.tenants: ", tenants);
     this._services = services;
     this._options = options;
-    this._throwOnError = options.throwOnError || false;
 
     this._tenants = [];
     this._tenantMap.clear();
@@ -58,9 +57,10 @@ class TenantManager {
       this._tenants.push(enriched);
       this._cacheTenant(enriched);
     } catch (err) {
+      console.log("err", err.message);
+      process.exit(1);
       const msg = `Failed to add tenant "${tenant.domain}": ${err.message}`;
-      if (this._throwOnError) throw new Error(msg);
-      console.error(msg);
+      throw new Error(msg);
     }
   }
 
@@ -87,10 +87,13 @@ class TenantManager {
   }
 
   findByDomain(domain) {
+    console.log("findByDomain 1", domain);
     if (!domain) {
       return undefined;
     }
-    return this._tenantMap.get(domain.toLowerCase());
+    let ok = this._tenantMap.get(domain.toLowerCase());
+    console.log("ok", ok);
+    return ok;
   }
 
   viewMiddleware(req, res, next) {
@@ -116,7 +119,9 @@ class TenantManager {
   }
 
   restMiddleware(req, res, next) {
+    console.log("restMiddleware", req.hostname);
     const tenant = this.findByDomain(req.hostname);
+    console.log("tenant", typeof tenant);
     if (!tenant) {
       return this._handleMissingTenant(
         res,

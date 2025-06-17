@@ -11,238 +11,207 @@ const rateLimit = require("express-rate-limit");
 const hpp = require("hpp");
 const session = require("express-session");
 const system = require("keeno-system");
-const Schema = require("keeno-schema");
-const TenantManager = require("./tenantManager");
+const { create } = require("handlebars");
 
-const { booleanType, emailType, enumType, integerType, stringType } =
-  Schema.types;
-
-/**
- * Base HTTP server providing core middleware, security,
- * session handling, rate limiting, error handling,
- * and multi-tenant support via `TenantManager`.
- *
- * Extend this class to build specialized servers (e.g., REST, GraphQL).
- */
 class BaseServer {
-  #app;
-  #tenantManager;
-  #config;
+  #expressConfig;
+  #tenantConfigs;
+  #express;
   #tenants;
-  #services;
-  #options;
-  #active = false;
-  #server = null;
+  #closeStack;
 
-  constructor() {
-    this.#app = express();
-    this.#tenantManager = new TenantManager();
-    this.#config = {};
-    this.#tenants = [];
-    this.#services = {};
-    this.#options = {};
+  constructor(expressConfig, tenantConfigs) {
+    // remember the express and tenant configurations
+    this.#expressConfig = expressConfig;
+    this.#tenantConfigs = tenantConfigs;
+
+    // initialize the service close stack
+    this.#closeStack = [];
+
+    // call methods to initialize express and tenants
+    this.initExpress();
+    this.initTenants();
   }
 
-  static async create(config, tenants = [], services = {}, options = {}) {
-    const server = new this();
-    await server.initialize(config, tenants, services, options);
-    return server;
+  async service(name, createFunc, closeFunc, apply) {
+    // Normalize apply value
+    apply = apply?.trim().toLowerCase();
+
+    // Nested helper to create and assign service
+    const doCreate = async (owner, config) => {
+      if (owner[name]) {
+        const label = owner === this ? "server" : `Tenant "${config.domain}"`;
+        throw new Error(`${label} already has property "${name}"`);
+      }
+
+      const instance = await createFunc(config);
+
+      if (typeof closeFunc === "function") {
+        this.#closeStack.unshift({ instance, closeFunc });
+      }
+
+      owner[name] = instance;
+    };
+
+    // Server-level service
+    if (apply === "server" || apply === "both") {
+      await doCreate(this, this.#expressConfig);
+    }
+
+    // Tenant-level service
+    if (apply === "tenants" || apply === "both") {
+      for (const tenant of this.#tenants) {
+        await doCreate(tenant, tenant.config);
+      }
+    }
+
+    return this;
   }
 
-  get app() {
-    return this.#app;
+  async model(name, modelClass) {
+    if (typeof modelClass !== "function") {
+      throw new Error(
+        `Model "${name}" must be a class or constructor function`
+      );
+    }
+
+    for (const tenant of this.#tenants) {
+      if (tenant.models[name]) {
+        throw new Error(
+          `Duplicate model "${name}" for tenant "${tenant.domain}"`
+        );
+      }
+
+      const instance = new modelClass(tenant);
+      tenant.models[name] = instance;
+
+      if (typeof instance.close === "function") {
+        this.#closeStack.unshift({ instance, closeFunc: instance.close });
+      }
+    }
+
+    return this;
   }
 
-  get options() {
-    return this.#options;
+  router(leadPath, routerInstance) {
+    this.#express.use(leadPath, routerInstance);
+    return this;
   }
 
-  get services() {
-    return this.#services;
+  middleware(handlerFunc) {
+    this.#express.use(handlerFunc);
+    return this;
   }
 
-  get tenantManager() {
-    return this.#tenantManager;
+  get express() {
+    return this.#express;
   }
 
   get tenants() {
     return this.#tenants;
   }
 
-  get active() {
-    return this.#active;
+  initExpress() {
+    this.#express = express();
+    this.initSecurity();
+    this.initSession();
+    this.initRateLimit();
+    this.initRequestLogger();
+    this.initHealthCheck();
+    this.init404Error();
+    this.initErrorHandler();
+    this.initShutdown();
   }
 
-  set active(value) {
-    if (value === this.#active) {
-      return;
-    }
-
-    if (value) {
-      const port = this.#config.port;
-      this.#server = this.#app.listen(port, () => {
-        this.#active = true;
-        system.log.info(`Server is listening on port: ${port}`);
+  initTenants() {
+    // create array of tenants
+    this.#tenants = [];
+    this.#tenantConfigs.forEach(config => {
+      this.#tenants.push({
+        id: config.id,
+        node: config.node,
+        domain: config.domain.toLowerCase().trim(),
+        config,
+        models: {},
       });
-    } else {
-      if (this.#server) {
-        this.#server.close(() => {
-          this.#active = false;
-          system.log.info("Server has been stopped.");
+    });
+
+    // middleware to resolve tenant based on request hostname
+    this.#express.use((req, res, next) => {
+      const hostname = req.hostname.toLowerCase().trim();
+
+      const tenant = this.#tenants.find(t => t.domain === hostname);
+
+      if (!tenant) {
+        return res.status(404).json({
+          error: "Tenant not found",
+          domain: hostname,
         });
-        this.#server = null;
       }
-    }
+
+      req.tenant = tenant;
+      next();
+    });
   }
 
-  async initialize(config, tenants = [], services = {}, options = {}) {
-    this.#config = this.configValidation(config);
-    this.#tenants = tenants;
-    this.#services = services;
-    this.#options = options;
+  initSecurity() {
+    this.#express.set("trust proxy", 1);
+    const limit = this.#expressConfig.body_limit || "10kb";
 
-    await this.initSecurity();
-    await this.initSession();
-    await this.initRateLimit();
-    await this.initLogger();
-    await this.initTenantManager();
-    await this.initMiddlewares();
-    await this.initHealthCheck();
-    await this.initRouters();
-    await this.init404Error();
-    await this.initErrorHandler();
-    await this.initShutdown();
+    this.#express.use(express.json({ limit }));
+    this.#express.use(express.urlencoded({ extended: true, limit }));
+    this.#express.use(helmet());
+    this.#express.use(hpp());
+    this.#express.use(cors({}));
   }
 
-  async initSecurity() {
-    this.app.set("trust proxy", 1);
-    const limit = this.#config.body_limit || "10kb";
-
-    this.app.use(express.json({ limit }));
-    this.app.use(express.urlencoded({ extended: true, limit }));
-    this.app.use(helmet());
-    this.app.use(hpp());
-    this.app.use(cors(this.#options.cors || {}));
-  }
-
-  async initSession() {
+  initSession() {
     const sessionOptions = {
-      secret: this.#config.session_secret,
+      secret: this.#expressConfig.session_secret,
       resave: false,
       saveUninitialized: false,
       cookie: {
         secure: !system.isDevelopment,
         httpOnly: true,
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 2, // 2 hours
+        maxAge: 1000 * 60 * 60 * 2,
       },
     };
-    this.app.use(session(sessionOptions));
+    this.express.use(session(sessionOptions));
   }
 
-  async initRateLimit() {
+  initRateLimit() {
     const limiter = rateLimit({
-      windowMs: this.#config.rate_limit_minutes * 60 * 1000,
-      max: this.#config.rate_limit_requests,
+      windowMs: this.#expressConfig.rate_limit_minutes * 60 * 1000,
+      max: this.#expressConfig.rate_limit_requests,
       standardHeaders: true,
       legacyHeaders: false,
     });
-    this.app.use(limiter);
+    this.express.use(limiter);
   }
 
-  async initLogger() {
+  initRequestLogger() {
     if (system.isDebugging) {
-      this.app.use(morgan("debug"));
+      this.express.use(morgan("debug"));
     } else if (system.isDevelopment) {
-      this.app.use(morgan("dev"));
+      this.express.use(morgan("dev"));
     }
   }
 
-  async initTenantManager() {
-    await this.#tenantManager.initialize(
-      this.tenants,
-      this.services,
-      this.options
-    );
+  initHealthCheck() {
+    throw new Error("InitHealthCheck not implemented");
   }
 
-  /**
-   * Registers any user-defined Express middlewares.
-   * Expects `services.middlewares` to be an array of functions (if defined).
-   */
-  async initMiddlewares() {
-    const { middlewares } = this.#services;
-
-    if (Array.isArray(middlewares)) {
-      for (const middleware of middlewares) {
-        if (typeof middleware === "function") {
-          this.#app.use(middleware);
-        } else {
-          system.log.warn("Ignored invalid middleware (not a function).");
-        }
-      }
-    }
+  init404Error() {
+    throw new Error("init404Error not implemented");
   }
 
-  async initHealthCheck() {
-    console.log("health check");
+  initErrorHandler() {
+    throw new Error("initErrorHandler not implemented");
   }
 
-  async initRouters() {
-    // To be implemented: project-specific routes
-  }
-
-  async init404Error() {
-    // To be implemented: catch-all route for 404 errors
-  }
-
-  async initErrorHandler() {
-    // To be implemented: centralized error handling middleware
-  }
-
-  async initShutdown() {
-    const shutdown = () => {
-      system.log.info?.("Shutting down gracefully...");
-      process.exit(0);
-    };
-    process.on("SIGINT", shutdown);
-    process.on("SIGTERM", shutdown);
-  }
-
-  configSchema() {
-    return {
-      port: integerType({ min: 1, max: 65000, required: true }),
-      db_url: stringType({ minLength: 1, maxLength: 255, required: true }),
-      log_collection_name: stringType({
-        minLength: 1,
-        maxLength: 255,
-        required: true,
-      }),
-      log_expiration_days: integerType({ min: 1, max: 365 }),
-      log_capped: booleanType(),
-      log_max_size: integerType({ min: 0, max: 1000 }),
-      log_max_docs: integerType({ min: 0, max: 1000000 }),
-      rate_limit_minutes: integerType({ min: 1, max: 3600, required: true }),
-      rate_limit_requests: integerType({ min: 1, max: 10000, required: true }),
-      body_limit: stringType({ min: 1, max: 255 }),
-      session_secret: stringType({
-        minLength: 16,
-        maxLength: 256,
-        required: true,
-      }),
-    };
-  }
-
-  configValidation(config) {
-    const schema = new Schema(this.configSchema());
-    const { validated, errors } = schema.validate(config);
-
-    if (errors.length === 0) {
-      return validated;
-    } else {
-      const message = errors.map(err => err.message).join(", ");
-      system.fatal(`Invalid server configuration, ${message}`);
-    }
+  initShutdown() {
+    throw new Error("initShutDown not implemented");
   }
 }
 
