@@ -1,22 +1,22 @@
-// createNodemailer.js:
+// createEmailer.js:
 
 "use strict";
 
 // Load all necessary modules
 const nodemailer = require("nodemailer");
-const { serverLog } = require("multitenant-express");
+const system = require("keeno-system");
 
 // Function to create a NodeMailer transport instance
-async function createNodeMailer(tenant) {
+async function createEMailer(tenant) {
   try {
     // Create the transport using tenant
     const transport = nodemailer.createTransport({
-      host: tenant.mailer_host,
-      port: tenant.mailer_port,
+      host: tenant.smtp_host,
+      port: tenant.smtp_port,
       secure: true, // Use SSL/TLS
       auth: {
-        user: tenant.mailer_username,
-        pass: tenant.mailer_password,
+        user: tenant.smtp_username,
+        pass: tenant.smtp_password,
       },
       tls: {
         rejectUnauthorized: false, // Allow self-signed certs (optional)
@@ -31,5 +31,5 @@ async function createNodeMailer(tenant) {
   }
 }
 
-// Export the createNodeMailer function
-module.exports = createNodeMailer;
+// Export the createEmailer function
+module.exports = createEmailer;

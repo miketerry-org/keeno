@@ -15,7 +15,7 @@ const {
   closeLog,
   AuthModel,
 } = require("keeno-mongodb");
-// const { createEmailer } = require("keeno-nodemailer");
+const { createEmailer, closeEmailer } = require("keeno-nodemailer");
 
 (async () => {
   try {
@@ -41,7 +41,8 @@ const {
     // define all services for server and tenants
     await server.service("db", createDB, closeDB, "both");
     await server.service("log", createLog, closeLog, "both");
-    // await server.service("emailer", CreateEmailer, closeEmailer, "both");
+    console.log("createEmailer", createEmailer);
+    await server.service("emailer", createEmailer, closeEmailer, "tenants");
 
     // assign a middleware function
     server.middleware((req, res, next) => {
