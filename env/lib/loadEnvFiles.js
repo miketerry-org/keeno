@@ -20,14 +20,14 @@ const system = require("keeno-system");
  * @throws {Error} If no files match or a config fails to load and `suppressErrors` is false.
  */
 function loadEnvFiles(filemask, encryptKey = "", schema = {}, options = {}) {
-  if (system.isDevelopment) {
+  if (system.isDebugging) {
     console.log("mask", filemask);
   }
 
   // Resolve glob pattern relative to the absolute directory
   const files = glob.sync(filemask, { absolute: true });
 
-  if (system.isDevelopment) {
+  if (system.isDebugging) {
     console.debug("files", files);
   }
 

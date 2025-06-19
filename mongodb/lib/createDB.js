@@ -31,17 +31,23 @@ async function createDB(tenant) {
       })
       .asPromise();
 
-    system.log.info(`Database connected to "${validated.db_url}"`);
+    if (system.isDebugging) {
+      system.log.info(`Database connected to "${validated.db_url}"`);
+    }
 
     connection.on("disconnected", () => {
-      system.log.info(`Database disconnected from "${connection.name}"`);
+      if (system.isDebugging) {
+        system.log.info(`Database disconnected from "${connection.name}"`);
+      }
     });
 
     return connection;
   } catch (err) {
-    system.log.error(
-      `Database connection error: (${validated.db_url}) ${err.message}`
-    );
+    if (system.isDebugging) {
+      system.log.error(
+        `Database connection error: (${validated.db_url}) ${err.message}`
+      );
+    }
     throw new Error(`Failed to connect to database: ${err.message}`);
   }
 }

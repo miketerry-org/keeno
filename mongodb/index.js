@@ -4,7 +4,9 @@
 
 // load all necessary modules
 const createDB = require("./lib/createDB");
+const closeDB = require("./lib/closeDB");
 const createLog = require("./lib/createLog");
+const closeLog = require("./lib/closeLog");
 const AuthModel = require("./lib/authModel");
 
-module.exports = { createDB, createLog, AuthModel };
+module.exports = { createDB, closeDB, createLog, closeLog, AuthModel };

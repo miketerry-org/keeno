@@ -38,8 +38,8 @@ function loadServerConfig() {
       session_secret: stringType({ min: 1, max: 255, required: true }),
     }),
 
-    // use verbose   logging if not in production mode
-    { verbose: !system.isProduction }
+    // use verbose   logging if in debugging mode
+    { verbose: system.isDebugging }
   );
 }
 

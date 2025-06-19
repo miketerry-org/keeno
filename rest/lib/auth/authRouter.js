@@ -3,23 +3,15 @@
 "use strict";
 
 // Load required modules
-const { Router } = require("express");
+const { BaseRouter } = require("keeno-base");
 const registerHelper = require("./helpers/register");
 
-// Initialize an empty authentication router
-const authRouter = Router();
-
-/**
- * Register a new user (POST /api/register)
- */
-authRouter.post("/register", async (req, res) => {
-  try {
-    const { code, payload } = await registerHelper(req.tenant, req.body);
-    res.status(code).json(payload);
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+class authRouter extends BaseRouter {
+  define() {
+    this.get("/register", (req, res) => {
+      res.status(201).json({ ok: true, data: {} });
+    });
   }
-});
+}
 
-// Export the router
-module.exports = { authRouter };
+module.exports = authRouter;

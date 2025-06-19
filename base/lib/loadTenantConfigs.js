@@ -44,7 +44,7 @@ function loadTenantConfigs() {
     }),
 
     // use verbose logging if not in production mode
-    { verbose: !system.isProduction }
+    { verbose: system.isDebugging }
   );
 }
 

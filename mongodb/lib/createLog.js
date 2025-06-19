@@ -75,13 +75,19 @@ async function createLog(tenant) {
           size: log_max_size * 1024 * 1024, // convert MB to bytes
           max: log_max_docs,
         });
-        system.debug(`Created capped collection: ${log_collection_name}`);
+        if (system.isDebugging) {
+          system.debug(`Created capped collection: ${log_collection_name}`);
+        }
       } else {
         await db.createCollection(log_collection_name);
-        system.debug(`Created standard collection: ${log_collection_name}`);
+        if (system.isDebugging) {
+          system.debug(`Created standard collection: ${log_collection_name}`);
+        }
       }
     } else {
-      system.debug(`Collection already exists: ${log_collection_name}`);
+      if (system.isDebugging) {
+        system.debug(`Collection already exists: ${log_collection_name}`);
+      }
     }
 
     // Setup TTL index if TTL logging is enabled
@@ -101,11 +107,15 @@ async function createLog(tenant) {
             name: "timestamp_ttl",
           }
         );
-        system.debug(
-          `Created TTL index 'timestamp_ttl' for ${log_expiration_days} days`
-        );
+        if (system.isDebugging) {
+          system.debug(
+            `Created TTL index 'timestamp_ttl' for ${log_expiration_days} days`
+          );
+        }
       } else {
-        system.debug("TTL index 'timestamp_ttl' already exists");
+        if (system.isDebugging) {
+          system.debug("TTL index 'timestamp_ttl' already exists");
+        }
       }
     }
 
@@ -131,14 +141,18 @@ async function createLog(tenant) {
     });
 
     // display message indicating loffer sucessfully created
-    system.log.info(`Logger created for "${validated.db_url}"`);
+    if (system.isDebugging) {
+      system.log.info(`Logger created for "${validated.db_url}"`);
+    }
 
     // Return the configured logger
     return logger;
   } catch (err) {
     // Log and rethrow any errors
-    system.debug(err.message);
-    system.log.error(err.message);
+    if (system.isDebugging) {
+      system.debug(err.message);
+      system.log.error(err.message);
+    }
     throw new Error(err.message);
   }
 }
