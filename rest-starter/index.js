@@ -15,7 +15,7 @@ const {
   closeLog,
   AuthModel,
 } = require("keeno-mongodb");
-const { createEmailer, closeEmailer } = require("keeno-nodemailer");
+// const { createEmailer, closeEmailer } = require("keeno-nodemailer");
 
 (async () => {
   try {
@@ -41,8 +41,8 @@ const { createEmailer, closeEmailer } = require("keeno-nodemailer");
     // define all services for server and tenants
     await server.service("db", createDB, closeDB, "both");
     await server.service("log", createLog, closeLog, "both");
-    console.log("createEmailer", createEmailer);
-    await server.service("emailer", createEmailer, closeEmailer, "tenants");
+    // console.log("createEmailer", createEmailer);
+    // await server.service("emailer", createEmailer, closeEmailer, "tenants");
 
     // assign a middleware function
     server.middleware((req, res, next) => {
@@ -58,7 +58,7 @@ const { createEmailer, closeEmailer } = require("keeno-nodemailer");
 
     // assign all routers
     server.router("/api/system", new systemRouter());
-    server.router("/api/auth", new authRouter());
+    // server.router("/api/auth", new authRouter());
 
     console.log("server.routes", server.routes);
     // start listening for requests

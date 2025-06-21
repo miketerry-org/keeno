@@ -7,7 +7,7 @@
     "dev": "NODE_ENV=development nodemon index.new.js",
     "debug": "NODE_ENV=debug nodemon index.js",
     "encrypt": "./_encrypt_all.sh",
-    "test": "jest --watch-all --bail"
+    "test": "NODE_ENV=test node --test --watch ./test"
   },
   "keywords": [
     "rest",

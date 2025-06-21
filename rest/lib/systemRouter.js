@@ -24,7 +24,6 @@ class SystemRouter extends BaseRouter {
 
     // GET /api/system/routes
     this.get("/routes", (req, res) => {
-      console.log("req.routes", req.routes);
       res.status(200).json({ ok: true, routes: { ...req.routes } });
     });
 

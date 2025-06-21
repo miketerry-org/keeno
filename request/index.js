@@ -1,4 +1,4 @@
-// index.js:
+// index.js: keeno-rest
 
 "use strict";
 
@@ -198,6 +198,7 @@ class TestRequest {
       }
     }
 
+    // console.log("requestOptions", requestOptions);
     const res = await fetch(url, requestOptions);
 
     let json = {};
