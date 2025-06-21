@@ -161,12 +161,9 @@ importers:
         specifier: workspace:*
         version: link:../system
     devDependencies:
-      jest:
-        specifier: ^29.7.0
-        version: 29.7.0(@types/node@24.0.1)
-      keeno-request:
+      keeno-test:
         specifier: workspace:*
-        version: link:../request
+        version: link:../test
 
   schema:
     dependencies:
@@ -182,6 +179,8 @@ importers:
         version: 29.7.0(@types/node@24.0.1)
 
   system: {}
+
+  test: {}
 
 packages:
 

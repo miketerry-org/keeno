@@ -3,8 +3,8 @@ packages:
   - env
   - mongodb
   - nodemailer
-  - request
   - rest
   - schema
   - system
+  - test
   - rest-starter

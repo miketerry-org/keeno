@@ -24,10 +24,6 @@ class BaseServer {
   #routes;
   #closeStack;
 
-  /**
-   * @param {Object} expressConfig - Configuration object for the Express server.
-   * @param {Array<Object>} tenantConfigs - Array of tenant configuration objects.
-   */
   constructor(expressConfig, tenantConfigs) {
     this.#expressConfig = expressConfig;
     this.#tenantConfigs = tenantConfigs;
@@ -37,14 +33,6 @@ class BaseServer {
     this.initTenants();
   }
 
-  /**
-   * Registers a service at the server and/or tenant level.
-   * @param {string} name - Property name to assign the service to.
-   * @param {Function} createFunc - Async function that returns the service instance.
-   * @param {Function} [closeFunc] - Optional function to call on shutdown.
-   * @param {"server"|"tenants"|"both"} apply - Where the service should be applied.
-   * @returns {Promise<void>}
-   */
   async service(name, createFunc, closeFunc, apply) {
     apply = apply?.trim().toLowerCase();
     if (!["server", "tenants", "both"].includes(apply)) {
@@ -81,12 +69,6 @@ class BaseServer {
     }
   }
 
-  /**
-   * Registers a model for each tenant.
-   * @param {string} name - The name of the model.
-   * @param {Function} modelClass - Constructor/class function for the model.
-   * @returns {Promise<void>}
-   */
   async model(name, modelClass) {
     if (typeof modelClass !== "function") {
       throw new Error(
@@ -110,11 +92,6 @@ class BaseServer {
     }
   }
 
-  /**
-   * Mounts a BaseRouter at the given lead path and registers its routes.
-   * @param {string} leadPath - The base path to mount the router on (e.g. "/api").
-   * @param {BaseRouter} routerInstance - An instance of a subclass of BaseRouter.
-   */
   router(leadPath, routerInstance) {
     const expressRouter = express.Router();
     const routes = routerInstance.getRoutes();
@@ -128,7 +105,6 @@ class BaseServer {
 
       expressRouter[lowerMethod](path, handler);
 
-      // Save the route for introspection/logging
       this.#routes.push({
         method,
         path: leadPath + path,
@@ -139,37 +115,20 @@ class BaseServer {
     this.#express.use(leadPath, expressRouter);
   }
 
-  /**
-   * Registers a global middleware.
-   * @param {Function} handlerFunc - Middleware function.
-   */
   middleware(handlerFunc) {
     this.#express.use(handlerFunc);
   }
 
-  /**
-   * Starts the Express server.
-   * @param {Function} callback - Callback executed once server starts.
-   */
   listen(callback) {
-    // add this route handler here so they are the last ones defined before server goes live
     this.init404Error();
     this.initErrorHandler();
-
-    // stsrt the server listenting for requests
     this.#express.listen(this.#expressConfig.port, callback);
   }
 
-  /**
-   * @returns {import("express").Express} The Express app instance.
-   */
   get express() {
     return this.#express;
   }
 
-  /**
-   * @returns {Array<Object>} Array of tenant objects.
-   */
   get tenants() {
     return this.#tenants;
   }
@@ -178,9 +137,6 @@ class BaseServer {
     return this.#routes;
   }
 
-  /**
-   * Initializes the Express app and base middleware stack.
-   */
   initExpress() {
     this.#express = express();
     this.initSecurity();
@@ -190,20 +146,14 @@ class BaseServer {
     this.initShutdown();
   }
 
-  /**
-   * Initializes tenant configuration and matching middleware.
-   */
   initTenants() {
-    this.#tenants = [];
-    for (const config of this.#tenantConfigs) {
-      this.#tenants.push({
-        id: config.id,
-        node: config.node,
-        domain: config.domain.toLowerCase().trim(),
-        config,
-        models: {},
-      });
-    }
+    this.#tenants = this.#tenantConfigs.map(config => ({
+      id: config.id,
+      node: config.node,
+      domain: config.domain.toLowerCase().trim(),
+      config,
+      models: {},
+    }));
 
     this.#express.use((req, res, next) => {
       const hostname = req.hostname.toLowerCase().trim();
@@ -214,13 +164,38 @@ class BaseServer {
 
       req.tenant = tenant;
       req.routes = this.routes;
+
+      tenant.metrics ??= {
+        totalRequests: 0,
+        totalErrors: 0,
+        startTime: tenant.metrics?.startTime ?? new Date(),
+        routes: {},
+      };
+
+      const metrics = tenant.metrics;
+      const routeKey = `${req.method} ${req.path}`;
+      const routeStats = (metrics.routes[routeKey] ??= {
+        count: 0,
+        totalTimeMs: 0,
+      });
+
+      const start = performance.now();
+
+      res.on("finish", () => {
+        const duration = performance.now() - start;
+        metrics.totalRequests++;
+        routeStats.count++;
+        routeStats.totalTimeMs += duration;
+
+        if (res.statusCode >= 400) {
+          metrics.totalErrors++;
+        }
+      });
+
       next();
     });
   }
 
-  /**
-   * Configures security-related middleware.
-   */
   initSecurity() {
     this.#express.set("trust proxy", 1);
     const limit = this.#expressConfig.body_limit || "10kb";
@@ -231,9 +206,6 @@ class BaseServer {
     this.#express.use(cors({}));
   }
 
-  /**
-   * Configures session management middleware.
-   */
   initSession() {
     const sessionOptions = {
       secret: this.#expressConfig.session_secret,
@@ -249,9 +221,6 @@ class BaseServer {
     this.#express.use(session(sessionOptions));
   }
 
-  /**
-   * Configures rate limiting middleware.
-   */
   initRateLimit() {
     const limiter = rateLimit({
       windowMs: this.#expressConfig.rate_limit_minutes * 60 * 1000,
@@ -262,9 +231,6 @@ class BaseServer {
     this.#express.use(limiter);
   }
 
-  /**
-   * Configures simple request logging.
-   */
   initRequestLogger() {
     console.log("initRequestLogger");
     this.#express.use((req, res, next) => {
@@ -274,9 +240,6 @@ class BaseServer {
     });
   }
 
-  /**
-   * Handles graceful server shutdown on exit signals.
-   */
   initShutdown() {
     const shutdown = async () => {
       console.log("BaseServer: Shutdown initiated...");
@@ -315,11 +278,6 @@ class BaseServer {
     });
   }
 
-  /**
-   * Sends a 404 error for unknown tenants.
-   * @param {string} hostname - Hostname requested.
-   * @param {import("express").Response} res - Express response.
-   */
   send404Error(hostname, res) {
     res.status(404).json({
       error: "Tenant not found",
@@ -327,24 +285,14 @@ class BaseServer {
     });
   }
 
-  /**
-   * Stub to be implemented in subclass.
-   */
   init404Error() {
     this.notImplemented("init404Error");
   }
 
-  /**
-   * Stub to be implemented in subclass.
-   */
   initErrorHandler() {
     this.notImplemented("initErrorHandler");
   }
 
-  /**
-   * Throws an error for any abstract method that was not implemented.
-   * @param {string} methodName - Name of the method.
-   */
   notImplemented(methodName) {
     throw new Error(
       `The "${methodName}" method must be overridden by a descendant class`

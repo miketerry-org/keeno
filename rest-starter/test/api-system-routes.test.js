@@ -3,8 +3,7 @@
 "use strict";
 
 // load all necessary modules
-const request = require("keeno-request");
-const { test } = require("node:test");
+const { request, describe, it, assert } = require("keeno-test");
 
 // rest api url
 const url = "http://local.mars:3000/api/system";
@@ -13,14 +12,46 @@ const url = "http://local.mars:3000/api/system";
 let context = {};
 
 (async () => {
-  test("health check", async () => {
-    await test("should be OK", async () => {
+  describe("/health check", async () => {
+    await it("should be OK", async () => {
       await request(url, context)
         .get("/health")
         .expectStatus(200)
         .expectHeader("Content-Type", "application/json", false)
         .expectBodyField("ok", true)
-        // .expectBodyField("timestamp", undefined)
+        .run(false);
+    });
+  });
+
+  describe("/info", async () => {
+    await it("should be OK", async () => {
+      await request(url, context)
+        .get("/info")
+        .expectStatus(200)
+        .expectHeader("Content-Type", "application/json", false)
+        .expectBodyField("ok", true)
+        .run(false);
+    });
+  });
+
+  describe("/timestamp", async () => {
+    await it("should be OK", async () => {
+      await request(url, context)
+        .get("/timestamp")
+        .expectStatus(200)
+        .expectHeader("Content-Type", "application/json", false)
+        .expectBodyField("ok", true)
+        .run(true);
+    });
+  });
+
+  describe("/routes", async () => {
+    await it("should be OK", async () => {
+      await request(url, context)
+        .get("/routes")
+        .expectStatus(200)
+        .expectHeader("Content-Type", "application/json", false)
+        .expectBodyField("ok", true)
         .run(true);
     });
   });

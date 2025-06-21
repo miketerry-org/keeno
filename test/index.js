@@ -1,8 +1,9 @@
-// index.js: keeno-rest
+// index.js: keeno-test
 
 "use strict";
 
-const fetch = require("node-fetch");
+const { test } = require("node:test");
+const assert = require("assert");
 
 /**
  * Create a new test request instance.
@@ -56,23 +57,47 @@ class TestRequest {
     return this;
   }
 
+  /**
+   * Append query parameters to the request.
+   * @param {Object} params
+   * @returns {TestRequest}
+   */
   query(params) {
     const str = new URLSearchParams(params).toString();
     this.queryParams += (this.queryParams ? "&" : "?") + str;
     return this;
   }
 
+  /**
+   * Set the request body. If given a string, sends it raw. Otherwise, sends JSON.
+   * @param {Object|string} body
+   * @returns {TestRequest}
+   */
   send(body) {
-    this.body = JSON.stringify(body);
-    this.headers["Content-Type"] = "application/json";
+    if (typeof body === "string") {
+      this.body = body;
+    } else {
+      this.body = JSON.stringify(body);
+      this.headers["Content-Type"] = "application/json";
+    }
     return this;
   }
 
+  /**
+   * Set an HTTP header.
+   * @param {string} key
+   * @param {string} value
+   * @returns {TestRequest}
+   */
   setHeader(key, value) {
     this.headers[key] = value;
     return this;
   }
 
+  /**
+   * Sends cookie from saved context if available.
+   * @returns {TestRequest}
+   */
   sendCookieFromContext() {
     if (this.context.cookie) {
       this.headers["Cookie"] = this.context.cookie;
@@ -80,6 +105,11 @@ class TestRequest {
     return this;
   }
 
+  /**
+   * Expect a specific HTTP status code.
+   * @param {number} code
+   * @returns {TestRequest}
+   */
   expectStatus(code) {
     this.assertions.push(async res => {
       if (res.status !== code) {
@@ -98,7 +128,7 @@ class TestRequest {
    */
   expectHeader(key, expected, exact = true) {
     this.assertions.push(async res => {
-      const actual = res.headers.get(key.toLowerCase());
+      const actual = res.headers.get(key);
       const match = exact ? actual === expected : actual?.includes(expected);
       if (!match) {
         throw new Error(
@@ -111,9 +141,17 @@ class TestRequest {
     return this;
   }
 
+  /**
+   * Expect a specific field in the JSON body.
+   * @param {string} key
+   * @param {*} expected - Optional value to match.
+   * @returns {TestRequest}
+   */
   expectBodyField(key, expected) {
     this.assertions.push(async (res, json) => {
-      if (!(key in json)) throw new Error(`Expected body to have key '${key}'`);
+      if (!(key in json)) {
+        throw new Error(`Expected body to have key '${key}'`);
+      }
       if (expected !== undefined && json[key] !== expected) {
         throw new Error(
           `Expected body['${key}'] = '${expected}', got '${json[key]}'`
@@ -123,6 +161,11 @@ class TestRequest {
     return this;
   }
 
+  /**
+   * Assert the entire JSON body matches the expected object.
+   * @param {Object} expected
+   * @returns {TestRequest}
+   */
   expectBodyEquals(expected) {
     this.assertions.push(async (res, json) => {
       const actualStr = JSON.stringify(json);
@@ -136,6 +179,11 @@ class TestRequest {
     return this;
   }
 
+  /**
+   * Assert that response body is exact text match.
+   * @param {string} expectedText
+   * @returns {TestRequest}
+   */
   expectTextBody(expectedText) {
     this.assertions.push(async res => {
       const text = await res.text();
@@ -148,11 +196,22 @@ class TestRequest {
     return this;
   }
 
+  /**
+   * Add a custom assertion function.
+   * @param {Function} fn - Function of shape (res, json) => Promise<void>
+   * @returns {TestRequest}
+   */
   expect(fn) {
     this.assertions.push(fn);
     return this;
   }
 
+  /**
+   * Save a field from the response body to the shared context.
+   * @param {string} bodyKey
+   * @param {string} contextKey
+   * @returns {TestRequest}
+   */
   saveBodyFieldToContext(bodyKey, contextKey) {
     this.assertions.push(async (res, json) => {
       this.context[contextKey] = json[bodyKey];
@@ -160,18 +219,30 @@ class TestRequest {
     return this;
   }
 
+  /**
+   * Save a cookie from the response headers to the context.
+   * @param {string} cookieName
+   * @returns {TestRequest}
+   */
   saveCookieFromResponse(cookieName) {
     this.assertions.push(async res => {
-      const raw = res.headers.raw()["set-cookie"];
-      if (!raw) return;
-      const cookie = raw.find(c => c.startsWith(`${cookieName}=`));
-      if (cookie) {
-        this.context.cookie = cookie.split(";")[0];
+      const setCookie = res.headers.get("set-cookie");
+      if (!setCookie) return;
+      const match = setCookie
+        .split(/,(?=\s*\w+=)/) // split by commas unless inside a cookie value
+        .find(c => c.trim().startsWith(`${cookieName}=`));
+      if (match) {
+        this.context.cookie = match.split(";")[0];
       }
     });
     return this;
   }
 
+  /**
+   * Execute the request and run all assertions.
+   * @param {boolean} [showDetails=false] - Print request/response info for debugging.
+   * @returns {Promise<{ res: Response, json: Object, context: Object }>}
+   */
   async run(showDetails = false) {
     const url = `${this.baseURL}${this.path}${this.queryParams}`;
 
@@ -198,7 +269,6 @@ class TestRequest {
       }
     }
 
-    // console.log("requestOptions", requestOptions);
     const res = await fetch(url, requestOptions);
 
     let json = {};
@@ -230,4 +300,14 @@ class TestRequest {
   }
 }
 
-module.exports = request;
+// alias test to describe and it
+const describe = test.describe;
+const it = test;
+
+module.exports = {
+  request,
+  test,
+  describe,
+  it,
+  assert,
+};

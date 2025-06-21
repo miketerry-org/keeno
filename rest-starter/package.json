@@ -26,7 +26,6 @@
     "keeno-system": "workspace:*"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "keeno-request": "workspace:*"
+    "keeno-test": "workspace:*"
   }
 }
