@@ -8,7 +8,7 @@ const registerHelper = require("./helpers/register");
 
 class authRouter extends BaseRouter {
   define() {
-    this.get("/register", (req, res) => {
+    this.post("/register", (req, res) => {
       res.status(201).json({ ok: true, data: {} });
     });
   }

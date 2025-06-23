@@ -53,7 +53,8 @@ const {
 
     // assign all routers
     server.router("/api/system", new systemRouter());
-    // server.router("/api/auth", new authRouter());
+    server.router("/api/auth", new authRouter());
+    console.log("routes", server.routes);
 
     // start listening for requests
     server.listen(() => {
