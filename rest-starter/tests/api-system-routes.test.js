@@ -41,7 +41,7 @@ let context = {};
         .expectStatus(200)
         .expectHeader("Content-Type", "application/json", false)
         .expectBodyField("ok", true)
-        .run(true);
+        .run(false);
     });
   });
 
@@ -52,7 +52,7 @@ let context = {};
         .expectStatus(200)
         .expectHeader("Content-Type", "application/json", false)
         .expectBodyField("ok", true)
-        .run(true);
+        .run(false);
     });
   });
 })();

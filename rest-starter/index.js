@@ -29,10 +29,11 @@ const {
     const tenantConfigs = loadTenantConfigs();
 
     // if in debug; log encrypt key, server and tenant configurations
+
     if (system.isDebugging) {
-      // console.debug("ENCRYPT_KEY", process.env.ENCRYPT_KEY);
-      // console.debug("serverConfig", serverConfig);
-      // console.debug("tenantConfigs", tenantConfigs);
+      console.debug("ENCRYPT_KEY", process.env.ENCRYPT_KEY);
+      console.debug("serverConfig", serverConfig);
+      console.debug("tenantConfigs", tenantConfigs);
     }
 
     // instanciate the rest server
@@ -44,12 +45,6 @@ const {
     // console.log("createEmailer", createEmailer);
     // await server.service("emailer", createEmailer, closeEmailer, "tenants");
 
-    // assign a middleware function
-    server.middleware((req, res, next) => {
-      console.log("inside a middleware");
-      next();
-    });
-
     // assign all models to each tenant
     await server.model("auth", AuthModel);
     // await server.model("profile", ProfileModel);
@@ -60,7 +55,6 @@ const {
     server.router("/api/system", new systemRouter());
     // server.router("/api/auth", new authRouter());
 
-    console.log("server.routes", server.routes);
     // start listening for requests
     server.listen(() => {
       console.log(`Server is listening on port ${serverConfig.port}`);

@@ -232,7 +232,6 @@ class BaseServer {
   }
 
   initRequestLogger() {
-    console.log("initRequestLogger");
     this.#express.use((req, res, next) => {
       console.info("[request]");
       console.info(`${req.method} ${req.url}`);
