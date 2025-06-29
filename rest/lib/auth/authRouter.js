@@ -1,16 +1,13 @@
 // authRouter.js:
-
-"use strict";
+("use strict");
 
 // Load required modules
 const { BaseRouter } = require("keeno-base");
-const registerHelper = require("./helpers/register");
+const registerUser = require("./helpers/registerUser");
 
 class authRouter extends BaseRouter {
   define() {
-    this.post("/register", (req, res) => {
-      res.status(201).json({ ok: true, data: {} });
-    });
+    this.post("/register", registerUser);
   }
 }
 

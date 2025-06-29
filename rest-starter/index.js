@@ -59,6 +59,7 @@ const {
     // start listening for requests
     server.listen(() => {
       console.log(`Server is listening on port ${serverConfig.port}`);
+      require("./test/api-auth-routes.test.js");
     });
   } catch (err) {
     // halt program if any error

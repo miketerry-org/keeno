@@ -1,4 +1,4 @@
-// createDB.js: create a mongoose database connection
+// createDB.js:
 
 "use strict";
 
@@ -8,6 +8,31 @@ const Schema = require("keeno-schema");
 
 // Destructure schema types needed by validation
 const { stringType } = Schema.types;
+
+/**
+ * Drops all collections in the given Mongoose connection.
+ * Used during testing to ensure a clean database state.
+ * @param {mongoose.Connection} connection
+ */
+async function dropAllCollections(connection) {
+  const collections = await connection.db.collections();
+  for (const collection of collections) {
+    try {
+      await collection.drop();
+      system.log.info(`Dropped collection: ${collection.collectionName}`);
+    } catch (err) {
+      // Ignore "ns not found" and other benign errors
+      if (
+        err.message !== "ns not found" &&
+        !/a background operation is currently running/.test(err.message)
+      ) {
+        system.log.warn(
+          `Failed to drop collection ${collection.collectionName}: ${err.message}`
+        );
+      }
+    }
+  }
+}
 
 /**
  * Asynchronously creates a MongoDB connection using Mongoose.
@@ -27,7 +52,7 @@ async function createDB(tenant) {
   try {
     const connection = await mongoose
       .createConnection(validated.db_url, {
-        serverSelectionTimeoutMS: 10000, // Let Mongoose handle timeout
+        serverSelectionTimeoutMS: 10000,
       })
       .asPromise();
 
@@ -40,6 +65,10 @@ async function createDB(tenant) {
         system.log.info(`Database disconnected from "${connection.name}"`);
       }
     });
+
+    if (system.isTesting) {
+      await dropAllCollections(connection);
+    }
 
     return connection;
   } catch (err) {

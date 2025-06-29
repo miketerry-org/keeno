@@ -3,7 +3,7 @@
 "use strict";
 
 // load all necessary modules
-const validValue = require("./validValue");
+const validString = require("./validString");
 
 /**
  * Validates an email address using a standard regex.
@@ -13,7 +13,11 @@ const validValue = require("./validValue");
  * @returns {{ value: string|any, message: string|undefined }}
  */
 function validEmail(object, key, rule) {
-  let { value, message } = validValue(object, key, rule);
+  // convert email to lower case
+  rule.capitalize = "lower";
+
+  // now verify it is a a valid string
+  let { value, message } = validString(object, key, rule);
 
   if (!message) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

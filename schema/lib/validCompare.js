@@ -15,7 +15,9 @@ const validValue = require("./validValue");
  */
 function validCompare(object, key, rule) {
   let { value, message } = validValue(object, key, rule);
-  if (message) return { value, message };
+  if (message) {
+    return { value, message };
+  }
 
   const compareKey = rule?.compareTo;
   if (!compareKey) {

@@ -1,4 +1,4 @@
-// baseServer.js:
+// baseServer.js
 
 "use strict";
 
@@ -143,6 +143,7 @@ class BaseServer {
     this.initSession();
     this.initRateLimit();
     this.initRequestLogger();
+    this.initSendJSONHelper();
     this.initShutdown();
   }
 
@@ -235,6 +236,16 @@ class BaseServer {
     this.#express.use((req, res, next) => {
       console.info("[request]");
       console.info(`${req.method} ${req.url}`);
+      next();
+    });
+  }
+
+  initSendJSONHelper() {
+    this.#express.use((req, res, next) => {
+      res.sendJSON = (code, data = {}, errors = []) => {
+        const ok = code >= 200 && code <= 299;
+        return res.status(code).json({ ok, data, errors });
+      };
       next();
     });
   }

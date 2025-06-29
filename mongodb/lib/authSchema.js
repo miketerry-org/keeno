@@ -87,7 +87,7 @@ const authSchema = mongoose.Schema(
     },
   },
   {
-    timestamps: true,
+    trimstamps: true,
     strict: true,
   }
 );

@@ -21,7 +21,7 @@ let context = {};
         .expectStatus(201)
         .expectHeader("Content-Type", "application/json", false)
         .expectBodyField("ok", true)
-        .run(true);
+        .run(false);
     });
   });
 })();
