@@ -35,7 +35,7 @@ const {
       console.debug("tenantConfigs", tenantConfigs);
     }
 
-    // instanciate the mvc server
+    // instantiate the mvc server
     let server = new MVCServer(serverConfig, tenantConfigs);
 
     //!!mike, must implement view engine
