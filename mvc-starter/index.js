@@ -1,4 +1,4 @@
-// index.js: keeno-rest-starter main entry point
+// index.js: keeno-mvc-starter main entry point
 
 ("use strict");
 
@@ -7,7 +7,7 @@ const path = require("path");
 const system = require("keeno-system");
 const { loadEncryptKey } = require("keeno-env");
 const { loadServerConfig, loadTenantConfigs } = require("keeno-base");
-const { RestServer, systemRouter, UserRouter } = require("keeno-rest");
+const { MVCServer, systemRouter, UserRouter } = require("keeno-mvc");
 const {
   createDB,
   closeDB,
@@ -35,8 +35,10 @@ const {
       console.debug("tenantConfigs", tenantConfigs);
     }
 
-    // instanciate the rest server
-    let server = new RestServer(serverConfig, tenantConfigs);
+    // instanciate the mvc server
+    let server = new MVCServer(serverConfig, tenantConfigs);
+
+    //!!mike, must implement view engine
 
     // define all services for server and tenants
     await server.service("db", createDB, closeDB, "both");
@@ -47,13 +49,12 @@ const {
     await server.model("user", UserModel);
 
     // assign all routers
-    server.router("/api/system", new systemRouter());
-    server.router("/api/user", new UserRouter());
+    server.router("/system", new systemRouter());
+    server.router("/user", new UserRouter());
 
     // start listening for requests
     server.listen(() => {
       console.log(`Server is listening on port ${serverConfig.port}`);
-      require("./test/api-user-routes.test.js");
     });
   } catch (err) {
     // halt program if any error

@@ -1,4 +1,4 @@
-// authSchema.js:
+// userSchema.js
 
 "use strict";
 
@@ -7,8 +7,8 @@ const bcrypt = require("bcrypt");
 const system = require("keeno-system");
 
 // Constants
-const SALT_ROUNDS = 10;
-const CODE_EXPIRATION_MINUTES = 10;
+const SALT_ROUNDS = 12;
+const CODE_EXPIRATION_MINUTES = 15;
 const MAX_FAILED_ATTEMPTS = 5;
 const ACCOUNT_LOCK_DURATION_MS = 15 * 60 * 1000;
 
@@ -19,15 +19,16 @@ function generateCode() {
   return `${part1}-${part2}`;
 }
 
-const authSchema = mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     email: {
       type: String,
       required: true,
       unique: true,
-      index: true, // This is enough — no need for schema.index()
+      index: true,
       trim: true,
       lowercase: true,
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Basic email validation
     },
     passwordHash: {
       type: String,
@@ -35,9 +36,9 @@ const authSchema = mongoose.Schema(
     },
     role: {
       type: String,
-      required: true,
       enum: system.userRoles,
       default: system.userRoles[0],
+      required: true,
     },
     firstname: {
       type: String,
@@ -55,11 +56,11 @@ const authSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    authCode: {
+    verifyCode: {
       type: String,
       match: /^\d{3}-\d{3}$/,
     },
-    authCodeExpiresAt: {
+    verifyCodeExpiresAt: {
       type: Date,
     },
 
@@ -87,48 +88,58 @@ const authSchema = mongoose.Schema(
     },
   },
   {
-    trimstamps: true,
+    timestamps: true,
     strict: true,
   }
 );
 
-// ✅ Valid indexes only
-authSchema.index({ authCodeExpiresAt: 1 }, { expireAfterSeconds: 0 });
-authSchema.index({ resetCodeExpiresAt: 1 }, { expireAfterSeconds: 0 });
-authSchema.index({ lockUntil: 1 });
+// TTL Indexes (automatic expiration)
+//!!mikeuserSchema.index({ verifyCodeExpiresAt: 1 }, { expireAfterSeconds: 0 });
+//!!mikeuserSchema.index({ resetCodeExpiresAt: 1 }, { expireAfterSeconds: 0 });
 
-// Instance methods
+// Login-related index
+userSchema.index({ lockUntil: 1 });
 
-authSchema.methods.comparePassword = function (candidatePassword) {
+/**
+ * INSTANCE METHODS
+ */
+
+// Compare password hashes
+userSchema.methods.verifyPassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.passwordHash);
 };
 
-authSchema.methods.isAccountLocked = function () {
-  return this.lockUntil && this.lockUntil > Date.now();
+// Check if account is locked
+userSchema.methods.isAccountLocked = function () {
+  return !!this.lockUntil && this.lockUntil > Date.now();
 };
 
-authSchema.methods.resetLock = function () {
+// Reset account lock
+userSchema.methods.resetLock = function () {
   this.failedLoginAttempts = 0;
   this.lockUntil = undefined;
 };
 
-authSchema.methods.incrementLoginAttempts = function () {
+// Increment login attempts and possibly lock
+userSchema.methods.incrementLoginAttempts = function () {
   this.failedLoginAttempts += 1;
   if (this.failedLoginAttempts >= MAX_FAILED_ATTEMPTS) {
     this.lockUntil = new Date(Date.now() + ACCOUNT_LOCK_DURATION_MS);
   }
 };
 
-authSchema.methods.generateAuthCode = function () {
+// Generate email verification code
+userSchema.methods.generateVerifyCode = function () {
   const code = generateCode();
-  this.authCode = code;
-  this.authCodeExpiresAt = new Date(
+  this.verifyCode = code;
+  this.verifyCodeExpiresAt = new Date(
     Date.now() + CODE_EXPIRATION_MINUTES * 60 * 1000
   );
   return code;
 };
 
-authSchema.methods.generateResetCode = function () {
+// Generate password reset code
+userSchema.methods.generateResetCode = function () {
   const code = generateCode();
   this.resetCode = code;
   this.resetCodeExpiresAt = new Date(
@@ -137,7 +148,11 @@ authSchema.methods.generateResetCode = function () {
   return code;
 };
 
-authSchema.pre("save", async function (next) {
+/**
+ * PRE-SAVE HOOK
+ * Hash password if modified
+ */
+userSchema.pre("save", async function (next) {
   if (!this.isModified("passwordHash")) return next();
   try {
     const salt = await bcrypt.genSalt(SALT_ROUNDS);
@@ -148,4 +163,4 @@ authSchema.pre("save", async function (next) {
   }
 });
 
-module.exports = authSchema;
+module.exports = userSchema;

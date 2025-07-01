@@ -83,6 +83,67 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0(winston@3.17.0)
 
+  mvc:
+    dependencies:
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      express:
+        specifier: ^5.1.0
+        version: 5.1.0
+      express-rate-limit:
+        specifier: ^7.5.0
+        version: 7.5.0(express@5.1.0)
+      helmet:
+        specifier: ^8.1.0
+        version: 8.1.0
+      hpp:
+        specifier: ^0.2.3
+        version: 0.2.3
+      keeno-base:
+        specifier: workspace:*
+        version: link:../base
+      keeno-env:
+        specifier: workspace:*
+        version: link:../env
+      keeno-schema:
+        specifier: workspace:*
+        version: link:../schema
+      keeno-system:
+        specifier: workspace:*
+        version: link:../system
+      morgan:
+        specifier: ^1.10.0
+        version: 1.10.0
+
+  mvc-starter:
+    dependencies:
+      keeno-base:
+        specifier: workspace:*
+        version: link:../base
+      keeno-env:
+        specifier: workspace:*
+        version: link:../env
+      keeno-mongodb:
+        specifier: workspace:*
+        version: link:../mongodb
+      keeno-mvc:
+        specifier: workspace:*
+        version: link:../mvc
+      keeno-nodemailer:
+        specifier: workspace:*
+        version: link:../nodemailer
+      keeno-schema:
+        specifier: workspace:*
+        version: link:../schema
+      keeno-system:
+        specifier: workspace:*
+        version: link:../system
+    devDependencies:
+      keeno-test:
+        specifier: workspace:*
+        version: link:../test
+
   nodemailer:
     dependencies:
       keeno-base:

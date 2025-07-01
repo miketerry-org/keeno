@@ -1,7 +1,7 @@
 {
-  "name": "keeno-rest-starter",
+  "name": "keeno-mvc-starter",
   "version": "0.1.0",
-  "description": "A REST API starter built with keeno packages",
+  "description": "A MVC application starter built with keeno packages",
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development nodemon index.js",
@@ -12,7 +12,7 @@
     "test:server": "NODE_ENV=test nodemon --watch ../rest --watch ../schema --watch index.js --ext js,json index.js"
   },
   "keywords": [
-    "rest",
+    "mvc",
     "starter",
     "keeno"
   ],
@@ -22,8 +22,8 @@
     "keeno-base": "workspace:*",
     "keeno-env": "workspace:*",
     "keeno-mongodb": "workspace:*",
+    "keeno-mvc": "workspace:*",
     "keeno-nodemailer": "workspace:*",
-    "keeno-rest": "workspace:*",
     "keeno-schema": "workspace:*",
     "keeno-system": "workspace:*"
   },

@@ -5,10 +5,10 @@
 const { BaseRouter } = require("keeno-base");
 const registerUser = require("./helpers/registerUser");
 
-class authRouter extends BaseRouter {
+class UserRouter extends BaseRouter {
   define() {
     this.post("/register", registerUser);
   }
 }
 
-module.exports = authRouter;
+module.exports = UserRouter;

@@ -3,8 +3,8 @@
 "use strict";
 
 // load all necessary modules
-const RestServer = require("./lib/restServer");
+const MVCServer = require("./lib/mvcServer");
 const systemRouter = require("./lib/systemRouter");
 const UserRouter = require("./lib/user/userRouter");
 
-module.exports = { RestServer, systemRouter, UserRouter };
+module.exports = { MVCServer, systemRouter, UserRouter };
