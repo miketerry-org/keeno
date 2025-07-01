@@ -1,0 +1,69 @@
+<div class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-800">
+  <div class="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-sm">
+    <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Email Sent: Please retrieve Your 6-Digit Code</h3>
+
+    <p class="mb-2 text-gray-700 dark:text-gray-300">An email has been sent to
+      <strong class="text-gray-900 dark:text-white">"{{email}}"</strong>, the address you provided. Inside the email, you’ll find a 6-digit code in the format <strong>XXX-XXX</strong>.</p>
+
+    <p class="mb-2 text-gray-700 dark:text-gray-300">Please check your inbox for
+      a message from
+      "<strong class="text-gray-900 dark:text-white">{{support_email}}</strong>".</p>
+
+    <p class="mb-2 text-gray-700 dark:text-gray-300">If you don't see the email
+      in your inbox, be sure to check your spam or junk folder.</p>
+
+    <p class="mb-4 text-gray-700 dark:text-gray-300">If you still don't receive
+      the email, you can request a new one or verify that the email address you
+      entered is correct.</p>
+
+    <h4 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Enter
+      Your Code Below:</h4>
+
+    <!-- Information on Timeout -->
+    <p class="mb-4 text-gray-700 dark:text-gray-300"><strong
+        class="text-gray-900 dark:text-white"
+      >Important:</strong>
+      You have 10 minutes to enter the 6-digit code from the email. After that,
+      the code will expire, and you will need to request a new one.</p>
+
+    <!-- Form to Enter Code with HTMX -->
+    <form action="/verify-code" method="post" >
+      <!-- Hidden input for email -->
+      <input type="hidden" name="email" value="{{email}}">
+
+      <label
+        for="code"
+        class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+      >Enter the 6-digit code from the email (in the format XXX-XXX):</label>
+      <input
+        type="text"
+        id="code"
+        name="code"
+        maxlength="7" <!-- Allow for the full "XXX-XXX" format -->
+        required
+        pattern="[0-9]{3}-[0-9]{3}" <!-- Updated to match "XXX-XXX" format -->
+        title="Please enter a 6-digit code in the format XXX-XXX"
+        inputmode="numeric"
+        class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-4 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400"
+      />
+
+      <!-- Buttons placed side by side -->
+      <div class="flex gap-4">
+        <button
+          type="submit"
+          class="w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+        >Sign In</button>
+        <button
+          type="button"
+          hx-get="/"
+          hx-target="main"
+          hx-swap="innerHTML"
+          class="w-full py-2 px-4 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+        >Cancel</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{{> content-end }}

@@ -1,0 +1,122 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+/* Base Reset & Typography */
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  background-color: #121212;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Headers */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  margin: 0;
+  color: #ffffff;
+}
+
+h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+
+/* Navbar links */
+nav a {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e0e0e0;
+  text-decoration: none;
+}
+
+nav a:hover,
+nav a:focus {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* Sign-in Button */
+.sign-in-button {
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  color: #ffffff;
+  background-color: #2563eb;
+  border-radius: 9999px;
+  border: none;
+}
+
+.sign-in-button:hover {
+  background-color: #1d4ed8;
+}
+
+/* General Buttons */
+.btn {
+  color: #e0e0e0;
+  background-color: #333;
+  border-color: #444;
+}
+
+.btn:hover,
+.btn:focus {
+  background-color: #444;
+  border-color: #555;
+  color: #ffffff;
+}
+
+/* Main Work Area */
+main {
+  padding: 2rem 1rem;
+  max-width: 1024px;
+  margin: 0 auto;
+  background-color: #181818;
+}
+
+/* Footer */
+footer {
+  font-size: 0.875rem;
+  color: #aaa;
+  text-align: center;
+  padding: 1rem 0;
+  background-color: #1f1f1f;
+  border-top: 1px solid #333;
+}
+
+/* Header (optional if used) */
+header {
+  background-color: #1f1f1f;
+  color: #e0e0e0;
+}
+
+/* Form Controls */
+input,
+textarea,
+select {
+  background-color: #222;
+  color: #eee;
+  border: 1px solid #444;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #999;
+}
+
+/* Borders and Dividers */
+hr,
+.border-top,
+.border-bottom {
+  border-color: #333 !important;
+}

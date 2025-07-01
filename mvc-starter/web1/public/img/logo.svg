@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <style>
+      /* Default (Dark Mode) Colors */
+      .mountain { fill: #ccc; }
+      .text { fill: white; }
+
+      /* Light Mode Colors */
+      @media (prefers-color-scheme: light) {
+        .mountain { fill: #444; }
+        .text { fill: #333; }
+      }
+    </style>
+  </defs>
+
+  <!-- Mountain Design -->
+  <g class="mountain">
+    <!-- Main mountain (triangle) -->
+    <polygon points="50,150 150,150 100,50" />
+    <!-- Secondary smaller mountain -->
+    <polygon points="70,140 130,140 100,80" />
+  </g>
+
+  <!-- Text Design (Mike Terry) -->
+  <text x="100" y="170" text-anchor="middle" class="text" font-family="Arial" font-size="20">
+    Mike Terry
+  </text>
+</svg>
