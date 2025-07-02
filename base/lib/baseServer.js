@@ -4,12 +4,15 @@
 
 // Load required modules
 const express = require("express");
+const compression = require("compression");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const hpp = require("hpp");
+const cookieParser = require("cookie-parser");
 const session = require("express-session");
+const fileupload = require("express-fileupload");
 const system = require("keeno-system");
 
 /**
@@ -24,11 +27,14 @@ class BaseServer {
   #routes;
   #closeStack;
 
-  constructor(expressConfig, tenantConfigs) {
-    this.#expressConfig = expressConfig;
+  constructor(serverConfig, tenantConfigs) {
+    // initialize class fields
+    this.#expressConfig = serverConfig;
     this.#tenantConfigs = tenantConfigs;
     this.#routes = [];
     this.#closeStack = [];
+
+    // call method to perform seperate initialization of express server features
     this.initExpress();
     this.initTenants();
   }
@@ -129,6 +135,10 @@ class BaseServer {
     return this.#express;
   }
 
+  get expressConfig() {
+    return this.#expressConfig;
+  }
+
   get tenants() {
     return this.#tenants;
   }
@@ -139,12 +149,28 @@ class BaseServer {
 
   initExpress() {
     this.#express = express();
+    this.initPoweredBy();
+    this.initCompression();
     this.initSecurity();
+    this.initCookieParser();
+    this.initDevelopmentLogging();
+    this.initFileUpload();
+    this.initStaticFiles();
     this.initSession();
     this.initRateLimit();
     this.initRequestLogger();
+    this.initViewEngine();
     this.initSendJSONHelper();
     this.initShutdown();
+  }
+
+  initPoweredBy() {
+    // Disable 'X-Powered-By' Header
+    this.#express.disable("x-powered-by");
+  }
+
+  initCompression() {
+    this.#express.use(compression());
   }
 
   initTenants() {
@@ -207,6 +233,29 @@ class BaseServer {
     this.#express.use(cors({}));
   }
 
+  initCookieParser() {
+    this.#express.use(cookieParser());
+  }
+
+  initDevelopmentLogging() {
+    if (system.isDevelopment) {
+      this.#express.use(morgan("dev"));
+    }
+  }
+
+  initFileUpload() {
+    this.#express.use(fileupload());
+  }
+
+  initStaticFiles() {
+    this.#express.use(
+      express.static(this.#expressConfig.static_path, {
+        maxAge: "1y",
+        etag: true,
+      })
+    );
+  }
+
   initSession() {
     const sessionOptions = {
       secret: this.#expressConfig.session_secret,
@@ -238,6 +287,10 @@ class BaseServer {
       console.info(`${req.method} ${req.url}`);
       next();
     });
+  }
+
+  initViewEngine() {
+    // overridden by ddescendant to implement  desired view engine
   }
 
   initSendJSONHelper() {

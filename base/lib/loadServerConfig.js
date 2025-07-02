@@ -35,7 +35,12 @@ function loadServerConfig() {
         required: false,
       }),
       body_limit: stringType({ required: true }),
+      static_path: stringType({ min: 1, max: 255, required: true }),
       session_secret: stringType({ min: 1, max: 255, required: true }),
+      views_path: stringType({ min: 1, max: 255, required: true }),
+      views_default_layout: stringType({ min: 1, max: 255, required: true }),
+      views_layouts_path: stringType({ min: 1, max: 255, required: true }),
+      views_partials_path: stringType({ min: 1, max: 255, required: true }),
     }),
 
     // use verbose   logging if in debugging mode

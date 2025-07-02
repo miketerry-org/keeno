@@ -3,6 +3,7 @@
 "use strict";
 
 // Load all necessary modules
+const { engine } = require("express-handlebars");
 const { BaseServer } = require("keeno-base");
 const system = require("keeno-system");
 
@@ -12,13 +13,33 @@ const system = require("keeno-system");
  * and structured error handling.
  */
 class MVCServer extends BaseServer {
+  initViewEngine() {
+    console.log("expressConfig", this.expressConfig);
+    // use the handlebars template for view engine
+    this.express.engine(
+      "hbs",
+      engine({
+        defaultLayout: this.expressConfig.views_default_layout,
+        layoutsDir: this.expressConfig.views_layouts_path,
+        partialsDir: this.expressConfig.views_partials_path,
+        extname: "hbs",
+      })
+    );
+    this.express.set("view engine", "hbs");
+    this.express.set("views", this.expressConfig.views_path);
+
+    if (system.isProduction) {
+      this.express.enable("view cache");
+    }
+  }
+
   /**
    * Registers a catch-all handler for unmatched routes.
    * Returns a standardized 404 JSON response.
    */
   init404Error() {
-    this.express.use((req, res) => {
-      res.status(404).json({ success: false, error: "Not Found" });
+    this.express.use((req, res, next) => {
+      res.status(404).send("404 error handler not implemented");
     });
   }
 
@@ -33,11 +54,7 @@ class MVCServer extends BaseServer {
 
       const message = system.isDevelopment ? err.message : "Server Error";
 
-      res.status(err.status || 500).json({
-        success: false,
-        error: message,
-        ...(system.isDevelopment ? { stack: err.stack } : {}),
-      });
+      res.status(err.status || 500).send("error handler not implemented");
     });
   }
 }
