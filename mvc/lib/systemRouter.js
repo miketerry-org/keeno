@@ -5,6 +5,37 @@
 const os = require("os");
 const { BaseRouter } = require("keeno-base");
 
+function prettyPrintTime(seconds) {
+  if (typeof seconds !== "number" || isNaN(seconds)) {
+    return "Invalid input";
+  }
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  const millis = Math.round((seconds % 1) * 1000);
+
+  const parts = [];
+
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0 || hours > 0) parts.push(`${minutes}m`);
+  parts.push(`${secs}s`);
+
+  // Show milliseconds if less than 10 seconds total
+  if (seconds < 10 && millis > 0) {
+    parts.push(`${millis}ms`);
+  }
+
+  return parts.join(" ");
+}
+
+function jsonToArrayOfNameValuePairs(jsonObject) {
+  return Object.keys(jsonObject).map(key => ({
+    name: key,
+    value: jsonObject[key],
+  }));
+}
+
 /**
  * Returns system-level and tenant-level diagnostic information.
  */
@@ -58,36 +89,34 @@ function getLocalIP() {
  */
 class SystemRouter extends BaseRouter {
   define() {
-    // GET /api/system/health
+    // GET /system/health
     this.get("/health", (req, res) => {
-      res.status(200).json({
-        ok: true,
-        message: "health check",
-        started: req.tenant.metrics?.startTime || null,
-        uptimeSeconds: process.uptime(),
-        now: new Date().toISOString(),
-      });
+      // initialize system health data
+      const data = {
+        current_time: new Date(),
+        start_time: req.tenant.metrics?.startTime || null,
+        up_time: prettyPrintTime(process.uptime()),
+      };
+
+      // render the system health partial web page
+      res.render("system_health", data);
     });
 
-    // GET /api/system/readiness
-    this.get("/readiness", (req, res) => {
-      res.status(200).json({ ok: true, message: "ready" });
-    });
-
-    // GET /api/system/info
+    // GET /system/info
     this.get("/info", (req, res) => {
       const system = getSystemInfo();
       const tenant = req.tenant;
       const metrics = tenant.metrics ?? {};
 
-      res.status(200).json({
-        ok: true,
+      const data = {
         ...system,
         tenant: tenant.domain,
         started: metrics.startTime || null,
         totalRequests: metrics.totalRequests || 0,
         totalErrors: metrics.totalErrors || 0,
-      });
+      };
+      const items = jsonToArrayOfNameValuePairs(data);
+      res.render("system_info", { items });
     });
 
     // GET /api/system/timestamp

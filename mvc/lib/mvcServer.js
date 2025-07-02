@@ -14,7 +14,6 @@ const system = require("keeno-system");
  */
 class MVCServer extends BaseServer {
   initViewEngine() {
-    console.log("expressConfig", this.expressConfig);
     // use the handlebars template for view engine
     this.express.engine(
       "hbs",

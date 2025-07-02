@@ -126,9 +126,12 @@ class BaseServer {
   }
 
   listen(callback) {
-    this.init404Error();
-    this.initErrorHandler();
-    this.#express.listen(this.#expressConfig.port, callback);
+    this.#express.listen(this.#expressConfig.port, () => {
+      console.log("here2");
+      callback();
+      // this.init404Error();
+      // this.initErrorHandler();
+    });
   }
 
   get express() {
@@ -191,6 +194,16 @@ class BaseServer {
 
       req.tenant = tenant;
       req.routes = this.routes;
+
+      // initialize the response locals which may be used int template rendering
+      res.locals.site_title = tenant.config.site_title;
+      res.locals.site_slogan = tenant.config.site_slogan;
+      res.locals.site_owner = tenant.config.site_owner;
+      res.locals.site_author = tenant.config.site_author;
+      res.locals.site_copyright = tenant.config.site_copyright;
+      res.locals.site_support_email = tenant.config.site_support_email;
+      res.locals.site_support_url = tenant.config.site_support_url;
+      console.log("res.locals", res.locals);
 
       tenant.metrics ??= {
         totalRequests: 0,
@@ -353,7 +366,7 @@ class BaseServer {
   }
 
   initErrorHandler() {
-    this.notImplemented("initErrorHandler");
+    // this.notImplemented("initErrorHandler");
   }
 
   notImplemented(methodName) {
