@@ -9,3 +9,6 @@ _tenants/*.env
 node_modules/
 package-lock.json
 mvc-starter/
+tworoads
+tworoads/
+x-trash/
