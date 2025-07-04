@@ -1,6 +1,6 @@
 {
   "name": "keeno-system",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "system related utilities",
   "main": "index.js",
   "scripts": {
